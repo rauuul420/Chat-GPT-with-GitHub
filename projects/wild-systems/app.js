@@ -28,6 +28,33 @@ function recordHistory() {
   if (history.length > HISTORY_LIMIT) history.shift();
 }
 
+function renderEvents() {
+  const list = element("event-log");
+  list.replaceChildren();
+  const recent = world.events.slice(-8).reverse();
+  if (recent.length === 0) {
+    const empty = document.createElement("li");
+    empty.textContent = "Todavía no ha ocurrido nada destacable.";
+    list.append(empty);
+    return;
+  }
+
+  const descriptions = {
+    herbivore_feeding: event => `Herbívoro #${event.organismId} encontró alimento`,
+    herbivore_birth: event => `Nació el herbívoro #${event.organismId}`,
+    predator_birth: event => `Nació el depredador #${event.organismId}`,
+    herbivore_death: event => `Herbívoro #${event.organismId} murió`,
+    predator_death: event => `Depredador #${event.organismId} murió`,
+    predation: event => `Depredador #${event.predatorId} cazó al herbívoro #${event.preyId}`
+  };
+
+  for (const event of recent) {
+    const item = document.createElement("li");
+    item.textContent = `Día ${event.day} · ${descriptions[event.type]?.(event) ?? "Acontecimiento del ecosistema"}`;
+    list.append(item);
+  }
+}
+
 function updateStats() {
   const stats = getWorldStats(world);
   element("herb").textContent = stats.herbivores;
