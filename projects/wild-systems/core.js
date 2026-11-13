@@ -458,6 +458,16 @@ export function getWorldStats(world) {
       biome, { plants: 0, herbivores: 0, predators: 0 }
     ])
   );
+  const lifeStages = {
+    herbivores: { juveniles: 0, adults: 0 },
+    predators: { juveniles: 0, adults: 0 }
+  };
+  for (const animal of world.herbivores) {
+    lifeStages.herbivores[animal.age >= world.config.herbivoreMaturityAge ? "adults" : "juveniles"]++;
+  }
+  for (const animal of world.predators) {
+    lifeStages.predators[animal.age >= world.config.predatorMaturityAge ? "adults" : "juveniles"]++;
+  }
   for (const plant of world.plants) {
     const cell = world.terrain.cells[plant.terrainCellId] ?? terrainCellAt(world, plant.x, plant.y);
     habitats[cell.biome].plants++;
@@ -468,6 +478,7 @@ export function getWorldStats(world) {
     day: world.day, plants: world.plants.length, herbivores: world.herbivores.length,
     predators: world.predators.length, totalOrganisms: world.herbivores.length + world.predators.length,
     habitats,
+    lifeStages,
     genetics: {
       herbivores: summarizeTraits(world.herbivores),
       predators: summarizeTraits(world.predators)
