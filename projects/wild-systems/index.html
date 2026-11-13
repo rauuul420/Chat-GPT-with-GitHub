@@ -66,12 +66,12 @@ footer{font-size:12px;color:#9aaa98;margin-top:16px}
     <label>Días por mundo (1–3000)<input id="experiment-days" type="number" min="1" max="3000" value="500"></label>
     <label>Semilla base<input id="experiment-seed" type="number" min="0" max="4294967295" value="20261113"></label>
     <button id="run-experiment" class="primary">Ejecutar lote</button>
-    <button id="export-experiments">Exportar CSV</button>
+    <button id="export-experiments">Exportar CSV</button><button id="clear-experiments">Limpiar resultados</button>
   </div>
   <div id="experiment-scenario-description" style="font-size:12px;color:#9fb09d;margin-top:8px"></div>
   <div id="experiment-status" role="status" aria-live="polite">Listo para ejecutar.</div>
   <div id="experiment-summary"></div>
-  <div style="overflow-x:auto"><table class="experiment-table"><thead><tr><th>Semilla</th><th>Herbívoros</th><th>Depredadores</th><th>Plantas</th><th>Ext. herb.</th><th>Ext. dep.</th></tr></thead><tbody id="experiment-results"></tbody></table></div>
+  <div style="overflow-x:auto"><table class="experiment-table"><thead><tr><th>Escenario</th><th>Semilla</th><th>Herbívoros</th><th>Depredadores</th><th>Plantas</th><th>Ext. herb.</th><th>Ext. dep.</th></tr></thead><tbody id="experiment-results"></tbody></table></div>
 </section>
 <footer>Experimento autónomo: los animales buscan alimento, consumen energía, se reproducen y mueren. Usa una semilla para repetir exactamente un mundo y comparar sus resultados.</footer>
 </main>
