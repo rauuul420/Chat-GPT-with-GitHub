@@ -1,4 +1,5 @@
 import { createWorld, stepWorld, getWorldStats, serializeWorld, restoreWorld } from "./core.js";
+import { runExperiment, summarizeExperiments } from "./experiments.js";
 
 const canvas = document.querySelector("#world");
 const context = canvas.getContext("2d");
@@ -62,6 +63,7 @@ function updateStats() {
   element("plants").textContent = stats.plants;
   element("day").textContent = stats.day;
   element("speed").textContent = `${speed}× velocidad`;
+  renderEvents();
 }
 
 function drawWorld() {
@@ -292,3 +294,95 @@ updateStats();
 drawWorld();
 drawHistory();
 requestAnimationFrame(animate);
+
+function renderExperimentResults(results, summary) {
+  const body = element("experiment-results");
+  body.replaceChildren();
+
+  for (const result of results) {
+    const row = document.createElement("tr");
+    for (const value of [
+      result.seed,
+      result.final.herbivores,
+      result.final.predators,
+      result.final.plants,
+      result.extinctionDays.herbivores ?? "—",
+      result.extinctionDays.predators ?? "—"
+    ]) {
+      const cell = document.createElement("td");
+      cell.textContent = String(value);
+      row.append(cell);
+    }
+    body.append(row);
+  }
+
+  element("experiment-summary").textContent =
+    `Media final: ${summary.averageFinal.herbivores.toFixed(1)} herbívoros, ${summary.averageFinal.predators.toFixed(1)} depredadores y ${summary.averageFinal.plants.toFixed(1)} plantas. ` +
+    `Extinción de herbívoros: ${summary.herbivoreExtinctionRate}% · depredadores: ${summary.predatorExtinctionRate}%.`;
+}
+
+let lastExperimentResults = [];
+
+element("run-experiment").addEventListener("click", async () => {
+  const runs = Number(element("experiment-runs").value);
+  const days = Number(element("experiment-days").value);
+  const baseSeed = Number(element("experiment-seed").value);
+
+  if (!Number.isInteger(runs) || runs < 1 || runs > 20 ||
+      !Number.isInteger(days) || days < 1 || days > 3000 ||
+      !Number.isInteger(baseSeed) || baseSeed < 0 || baseSeed > 4294967295) {
+    element("experiment-status").textContent = "Revisa los valores: 1–20 ejecuciones, 1–3000 días y una semilla válida.";
+    return;
+  }
+
+  const button = element("run-experiment");
+  button.disabled = true;
+  lastExperimentResults = [];
+  element("experiment-results").replaceChildren();
+  element("experiment-summary").textContent = "";
+  element("experiment-status").textContent = "Preparando experimentos…";
+
+  try {
+    for (let index = 0; index < runs; index++) {
+      const seed = (baseSeed + Math.imul(index, 0x9E3779B9)) >>> 0;
+      lastExperimentResults.push(runExperiment(seed, days));
+      element("experiment-status").textContent = `Ejecutando experimento ${index + 1} de ${runs}…`;
+      await new Promise(resolve => requestAnimationFrame(() => resolve()));
+    }
+
+    const summary = summarizeExperiments(lastExperimentResults);
+    renderExperimentResults(lastExperimentResults, summary);
+    element("experiment-status").textContent = `Completado: ${runs} mundos × ${days} días.`;
+  } catch (error) {
+    element("experiment-status").textContent = error.message || "No se pudieron completar los experimentos.";
+  } finally {
+    button.disabled = false;
+  }
+});
+
+element("export-experiments").addEventListener("click", () => {
+  if (lastExperimentResults.length === 0) {
+    element("experiment-status").textContent = "Primero ejecuta un experimento.";
+    return;
+  }
+
+  const headers = ["seed","days","final_plants","final_herbivores","final_predators","herbivore_extinction_day","predator_extinction_day","mean_plants","mean_herbivores","mean_predators","peak_plants","peak_herbivores","peak_predators"];
+  const rows = lastExperimentResults.map(result => [
+    result.seed, result.days, result.final.plants, result.final.herbivores,
+    result.final.predators, result.extinctionDays.herbivores ?? "",
+    result.extinctionDays.predators ?? "", result.mean.plants,
+    result.mean.herbivores, result.mean.predators, result.peak.plants,
+    result.peak.herbivores, result.peak.predators
+  ]);
+  const csv = [headers, ...rows].map(row =>
+    row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")
+  ).join("\n");
+  const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "wild-systems-experiments.csv";
+  document.body.append(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
