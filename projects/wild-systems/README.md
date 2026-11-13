@@ -29,13 +29,14 @@ GitHub Actions runs the test suite when files in this project change.
 
 ## Current prototype
 
-**Version 0.9.0 — habitat-aware ecology.** Animal target selection now accounts for biome affinity and local resource or prey concentration. Habitat population counts are visible in the simulation.
+**Version 0.10.0 — inherited traits and natural selection.** Animal target selection accounts for biome affinity and local resource or prey concentration. Individuals now carry heritable speed, metabolism and feeding-efficiency traits; offspring inherit their parent's traits with small random mutations, and trait effects influence movement, energy use and food gains.
 
 - **Vegetation** regrows within a population cap, with seasonal growth rates and a bias towards fertile, moist terrain cells.
 - **Terrain and biomes** form a deterministic 12 × 7 grid. Fertility, elevation, soil moisture and surface water drive six changing habitat classes: aquatic, wetland, forest, grassland, arid and barren. Each biome modifies local vegetation suitability.
 - **Seasons and climate** follow a deterministic four-season calendar. Seasonal rainfall and evaporation feed a local water cycle: rain accumulates on the surface, infiltrates soil, evaporates or runs towards lower neighbouring cells. Soil moisture and surface water remain separate state variables.
 - **Herbivores** choose vegetation using distance, local plant suitability and biome affinity, then consume energy, reproduce, and die.
 - **Predators** favour suitable habitats and local concentrations of herbivores when selecting prey, then reproduce when sufficiently fed.
+- **Genetics** gives each animal speed, metabolism and feeding-efficiency traits. Asexual offspring inherit these traits with independent small mutations; generation and parent IDs are tracked, and population-average traits are available for analysis.
 - Pause, resume, advance one day, reset, and adjust simulation speed.
 - A deterministic seeded random generator makes runs reproducible; enter a seed in the interface to replay a world.
 - The simulation runs on a fixed time step, independent of display refresh rate.
@@ -69,7 +70,7 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - The world is a continuous 2D plane with reflecting borders, overlaid by a 12 × 7 ecological grid.
 - Biomes are emergent classifications, recalculated from local conditions each simulation day; they are not hand-painted map regions. Habitat suitability influences where new vegetation establishes.\n- The hydrology model is intentionally simplified: it represents surface runoff between neighbouring cells, infiltration and evaporation, but not groundwater, river networks, erosion or calibrated water volumes. Plant growth is still a population-level regrowth budget distributed by local habitat suitability.
 - A new world starts in spring. The seasonal year has four configurable seasons of 90 days each by default. Spring, summer, autumn and winter modify vegetation growth and daily energy costs; temperature is a deterministic indicator, not yet a physiological survival threshold.
-- Organisms use habitat-weighted target selection with simple fixed species affinities; there is no individual learning, memory, territory, genetics, or social behaviour yet.
+- Organisms use habitat-weighted target selection with fixed species affinities. Genetics currently uses asexual inheritance from one parent; sexual reproduction, dominance, gene recombination, individual learning, memory, territory and social behaviour are not implemented.
 - The model is an exploratory toy model, not a scientifically calibrated ecological model.
 - Predators act after the herbivore phase, so newly born herbivores can be hunted on the day they are born. Newborns do not otherwise take a turn in their birth phase.
 - Target selection and prey-density estimation are still direct scans; spatial indexing will matter for substantially larger worlds.
@@ -96,6 +97,13 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Reproducible multi-seed experiment batches with population and extinction summaries.
 - [x] Export experiment results as CSV.
 - [ ] Copyable experiment settings.
+
+### 0.10 — Inherited traits and selection
+- [x] Give animals heritable speed, metabolism and feeding-efficiency traits.
+- [x] Add small bounded mutations during reproduction.
+- [x] Make traits affect movement, energy use and feeding outcomes.
+- [x] Track generation and parent lineage, including save migration.
+- [ ] Measure trait distributions and selection pressure across experiment batches.
 
 ### 0.9 — Habitat-aware ecology
 - [x] Give herbivores biome affinities when selecting vegetation.
