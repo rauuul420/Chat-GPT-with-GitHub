@@ -375,7 +375,10 @@ test("seasonal weather changes local soil moisture within safe bounds", () => {
   for (let day = 0; day < 90; day++) stepWorld(world);
   assert.ok(world.terrain.cells.some((cell, index) => cell.moisture !== initial[index]));
   assert.ok(world.terrain.cells.every(cell => cell.moisture >= 0.08 && cell.moisture <= 0.98));
-  assert.ok(world.terrain.cells.every(cell => cell.growthWeight === Number((cell.fertility * cell.moisture).toFixed(4))));
+  assert.ok(world.terrain.cells.every(cell => {
+    const suitability = Math.max(0.05, 1 - Math.abs(cell.moisture - 0.62) / 0.62);
+    return cell.growthWeight === Number((cell.fertility * suitability).toFixed(4));
+  }));
 });
 
 test("seasonal soil moisture is reproducible across identical worlds and saves", () => {
