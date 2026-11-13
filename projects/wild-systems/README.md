@@ -66,7 +66,7 @@ projects/wild-systems/
 
 ## Experiment laboratory
 
-The browser laboratory can run 1–20 independent worlds for up to 3,000 days per world. Choose one of five scenarios, optionally override vegetation growth, season length, daily energy costs, predator speed, and species maturity ages, then run independent seeds derived deterministically from the base seed. Results include final, mean, and peak populations, first extinction day for herbivores and predators, event totals, final genetic averages, and initial-to-final trait changes. Results from different scenario runs accumulate in a comparison table with per-scenario summaries until cleared. Reusing the same base seed across scenarios helps compare different ecological conditions with a consistent seed set. The laboratory keeps up to 500 result rows in memory. Export the full table as CSV for analysis. Batch execution yields between runs so the page can repaint and report progress.
+The browser laboratory can run 1–20 independent worlds for up to 3,000 days per world. Choose one of five scenarios, optionally override vegetation growth, season length, daily energy costs, predator speed, and species maturity ages, then run independent seeds derived deterministically from the base seed. Results include final, mean, and peak populations, first extinction day for herbivores and predators, event totals, final genetic averages, and initial-to-final trait changes. Results from different scenario runs accumulate in a comparison table with per-scenario summaries until cleared. Reusing the same base seed across scenarios helps compare different ecological conditions with a consistent seed set. The laboratory keeps up to 500 result rows in memory. Export the full table as CSV for analysis. Export and import validated JSON experiment settings to share reproducible configurations without replacing accumulated results. Batch execution yields between runs so the page can repaint and report progress.
 
 ## Genetic model
 
@@ -109,7 +109,7 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Export and import complete world state as JSON.
 - [x] Reproducible multi-seed experiment batches with population and extinction summaries.
 - [x] Export experiment results as CSV.
-- [ ] Copyable experiment settings.
+- [x] Export and import copyable experiment settings.
 
 ### 0.10 — Inherited traits and selection
 - [x] Give animals heritable speed, metabolism and feeding-efficiency traits.
@@ -166,7 +166,7 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Traits, inheritance, mutation, and selection.
 - [x] Five scenario presets for controlled experiments.
 - [x] Optional overrides for vegetation growth, energy costs, and predator speed.
-- [ ] Save and share custom scenario configurations.
+- [x] Save and share custom scenario configurations.
 
 ## Validation questions
 
