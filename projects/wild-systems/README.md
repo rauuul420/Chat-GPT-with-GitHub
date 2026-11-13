@@ -95,7 +95,14 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Export experiment results as CSV.
 - [ ] Copyable experiment settings.
 
-### 0.7 — Local hydrology\n- [x] Separate surface water from soil moisture.\n- [x] Add seasonal rainfall and temperature-sensitive evaporation.\n- [x] Route excess surface water towards lower neighbouring cells.\n- [x] Make vegetation placement respond to moisture suitability, not simply wetter-is-better.\n- [x] Migrate 0.6 terrain saves to the hydrology-aware schema.\n\n### 0.6 — Spatial ecology
+### 0.7 — Local hydrology
+- [x] Separate surface water from soil moisture.
+- [x] Add seasonal rainfall and temperature-sensitive evaporation.
+- [x] Route excess surface water towards lower neighbouring cells.
+- [x] Make vegetation placement respond to moisture suitability, not simply wetter-is-better.
+- [x] Migrate 0.6 terrain saves to the hydrology-aware schema.
+
+### 0.6 — Spatial ecology
 - [x] Generate reproducible fertility and moisture maps from the world seed.
 - [x] Bias initial vegetation and regrowth towards resource-rich cells.
 - [x] Visualize spatial variation directly on the world map.
