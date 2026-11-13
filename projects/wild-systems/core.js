@@ -39,19 +39,6 @@ function distance(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
-function nearest(items, source) {
-  let candidate = null;
-  let bestDistance = Infinity;
-  for (const item of items) {
-    const currentDistance = distance(item, source);
-    if (currentDistance < bestDistance) {
-      candidate = item;
-      bestDistance = currentDistance;
-    }
-  }
-  return candidate;
-}
-
 function hashTerrain(seed, x, y, salt) {
   let value = (seed ^ Math.imul(x + 1, 0x9E3779B1) ^ Math.imul(y + 1, 0x85EBCA77) ^ salt) >>> 0;
   value ^= value >>> 16;
@@ -163,7 +150,7 @@ function terrainCellAt(world, x, y) {
   return world.terrain.cells[row * columns + column];
 }
 
-function selectHerbivoreFood(world, herbivore) {
+export function selectHerbivoreFood(world, herbivore) {
   let candidate = null;
   let bestScore = Infinity;
   for (const plant of world.plants) {
@@ -176,14 +163,25 @@ function selectHerbivoreFood(world, herbivore) {
   return candidate;
 }
 
-function selectPredatorPrey(world, predator) {
+function calculatePreyDensity(world) {
+  const density = new Map();
+  for (const prey of world.herbivores) {
+    let nearby = 0;
+    for (const other of world.herbivores) {
+      if (distance(prey, other) <= 105) nearby++;
+    }
+    density.set(prey.id, nearby);
+  }
+  return density;
+}
+
+export function selectPredatorPrey(world, predator, preyDensity = calculatePreyDensity(world)) {
   let candidate = null;
   let bestScore = Infinity;
   for (const prey of world.herbivores) {
     const cell = terrainCellAt(world, prey.x, prey.y);
     const affinity = PREDATOR_BIOME_AFFINITY[cell.biome] ?? 0.5;
-    let localPrey = 0;
-    for (const other of world.herbivores) if (distance(prey, other) <= 105) localPrey++;
+    const localPrey = preyDensity.get(prey.id) ?? 1;
     const concentrationBonus = 1 + Math.max(0, localPrey - 1) * 0.12;
     const habitatQuality = 0.65 + affinity * 0.45;
     const score = distance(prey, predator) / (habitatQuality * concentrationBonus);
@@ -367,9 +365,10 @@ export function stepWorld(world) {
 
   const predatorBirths = [];
   const survivingPredators = [];
+  const preyDensity = calculatePreyDensity(world);
 
   for (const predator of world.predators) {
-    const prey = selectPredatorPrey(world, predator);
+    const prey = selectPredatorPrey(world, predator, preyDensity);
     moveAnimal(world, predator, prey, config.predatorSpeed, config);
     predator.energy -= config.predatorDailyCost * environment.predatorCostMultiplier;
     predator.age += 1;
