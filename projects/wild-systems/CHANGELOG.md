@@ -2,6 +2,13 @@
 
 Notable changes to Wild Systems are documented here.
 
+## [0.13.0] — 2026-11-13
+
+- Added population standard deviation and coefficient of variation across experiment runs.
+- Included variability metrics in batch summaries and CSV exports.
+- Added deterministic and zero-population variability tests.
+
+
 ## [0.12.0] — 2026-11-13
 
 - Added validated JSON export/import for reproducible experiment settings.
