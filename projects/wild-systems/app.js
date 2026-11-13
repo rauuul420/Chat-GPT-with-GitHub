@@ -1,5 +1,5 @@
 import { createWorld, stepWorld, getWorldStats, serializeWorld, restoreWorld } from "./core.js";
-import { runExperiment, summarizeExperiments, getExperimentScenario } from "./experiments.js";
+import { runExperiment, summarizeExperiments, getExperimentScenario, EXPERIMENT_PARAMETER_DEFINITIONS, serializeExperimentSettings, restoreExperimentSettings } from "./experiments.js";
 import { getEnvironment } from "./environment.js";
 
 const canvas = document.querySelector("#world");
@@ -10,6 +10,7 @@ const width = canvas.width;
 const height = canvas.height;
 const element = id => document.getElementById(id);
 const HISTORY_LIMIT = 300;
+const experimentParameterDefinitions = EXPERIMENT_PARAMETER_DEFINITIONS;
 const STEP_INTERVAL = 1000 / 30;
 
 let world = createWorld(Math.floor(Math.random() * 0xFFFFFFFF) >>> 0);
@@ -468,26 +469,17 @@ element("run-experiment").addEventListener("click", async () => {
   const days = Number(element("experiment-days").value);
   const baseSeed = Number(element("experiment-seed").value);
   const customConfig = {};
-  const parameterDefinitions = [
-    ["experiment-plant-growth", "plantGrowthPerDay", 0, 20, true],
-    ["experiment-season-length", "seasonLengthDays", 30, 180, true],
-    ["experiment-herbivore-cost", "herbivoreDailyCost", 0.01, 5, false],
-    ["experiment-predator-cost", "predatorDailyCost", 0.01, 5, false],
-    ["experiment-predator-speed", "predatorSpeed", 0.1, 3, false],
-    ["experiment-herbivore-maturity", "herbivoreMaturityAge", 1, 365, true],
-    ["experiment-predator-maturity", "predatorMaturityAge", 1, 365, true]
-  ];
   let invalidParameter = false;
-  for (const [id, key, minimum, maximum, integer] of parameterDefinitions) {
-    const raw = element(id).value.trim();
+  for (const definition of experimentParameterDefinitions) {
+    const raw = element(definition.id).value.trim();
     if (raw === "") continue;
     const value = Number(raw);
-    if (!Number.isFinite(value) || value < minimum || value > maximum ||
-        (integer && !Number.isInteger(value))) {
+    if (!Number.isFinite(value) || value < definition.min || value > definition.max ||
+        (definition.integer && !Number.isInteger(value))) {
       invalidParameter = true;
       break;
     }
-    customConfig[key] = value;
+    customConfig[definition.key] = value;
   }
 
   if (invalidParameter) {
@@ -583,4 +575,59 @@ element("export-experiments").addEventListener("click", () => {
   link.click();
   link.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+
+element("export-experiment-settings").addEventListener("click", () => {
+  try {
+    const config = {};
+    for (const definition of experimentParameterDefinitions) {
+      const raw = element(definition.id).value.trim();
+      if (raw !== "") config[definition.key] = Number(raw);
+    }
+    const settings = serializeExperimentSettings({
+      scenario: element("experiment-scenario").value,
+      config,
+      runs: Number(element("experiment-runs").value),
+      days: Number(element("experiment-days").value),
+      baseSeed: Number(element("experiment-seed").value)
+    });
+    const url = URL.createObjectURL(new Blob([settings], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "wild-systems-experiment-settings.json";
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    element("experiment-status").textContent = "Configuración exportada.";
+  } catch (error) {
+    element("experiment-status").textContent = error.message || "No se pudo exportar la configuración.";
+  }
+});
+
+element("import-experiment-settings").addEventListener("click", () => {
+  element("experiment-settings-file").click();
+});
+
+element("experiment-settings-file").addEventListener("change", async event => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  try {
+    const settings = restoreExperimentSettings(await file.text());
+    element("experiment-scenario").value = settings.scenario;
+    element("experiment-scenario-description").textContent =
+      getExperimentScenario(settings.scenario).description;
+    for (const definition of experimentParameterDefinitions) {
+      element(definition.id).value = settings.config[definition.key] ?? "";
+    }
+    element("experiment-runs").value = String(settings.runs);
+    element("experiment-days").value = String(settings.days);
+    element("experiment-seed").value = String(settings.baseSeed);
+    element("experiment-status").textContent = "Configuración importada. Los resultados existentes se han conservado.";
+  } catch (error) {
+    element("experiment-status").textContent = error.message || "No se pudo importar la configuración.";
+  } finally {
+    event.target.value = "";
+  }
 });
