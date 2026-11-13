@@ -38,7 +38,7 @@ GitHub Actions runs the test suite when files in this project change.
 - A rolling population chart tracks vegetation, herbivores, and predators over the last 300 simulated days.
 - A concise event feed reports feeding, births, deaths, and predation.
 - Export and import complete world saves as versioned JSON files.
-- Run batches of independent seeded worlds, compare final populations and extinction rates, and export CSV results.
+- Run batches of independent seeded worlds across five starting scenarios, compare final populations and extinction rates, and export CSV results.
 
 ## Project structure
 
@@ -46,8 +46,7 @@ GitHub Actions runs the test suite when files in this project change.
 projects/wild-systems/
 ├── index.html          # Interface and canvas
 ├── app.js              # Rendering, controls, animation loop
-├── experiments.js      # Reproducible multi-run experiment runner
-├── experiments.js      # Reproducible multi-run experiment runner
+├── experiments.js      # Scenarios and reproducible multi-run experiment runner
 ├── core.js             # Pure simulation rules and world state
 ├── package.json        # Native Node test command
 ├── README.md
@@ -57,7 +56,7 @@ projects/wild-systems/
 
 ## Experiment laboratory
 
-The browser laboratory can run 1–20 independent worlds for up to 3,000 days per world. Each run receives a deterministic seed derived from the base seed. Results include final, mean, and peak populations, first extinction day for herbivores and predators, and event totals. Export the run table as CSV for analysis. Batch execution yields between runs so the page can repaint and report progress.
+The browser laboratory can run 1–20 independent worlds for up to 3,000 days per world. Choose one of five scenarios, then run independent seeds derived deterministically from the base seed. Results include final, mean, and peak populations, first extinction day for herbivores and predators, and event totals. Export the run table as CSV for analysis. Batch execution yields between runs so the page can repaint and report progress.
 
 ## Model and current limitations
 
