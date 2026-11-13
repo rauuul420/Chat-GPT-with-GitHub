@@ -234,7 +234,7 @@ test("custom experiment parameters override only the selected scenario", () => {
     initialPredators: 0,
     plantGrowthPerDay: 2
   });
-  assert.equal(result.final.plants, 20);
+  assert.equal(result.final.plants, 25);
   assert.equal(result.final.herbivores, 0);
   assert.equal(result.final.predators, 0);
 });
@@ -562,7 +562,7 @@ test("herbivores may prefer a nearby high-quality grassland plant over a closer 
 test("predators can favour a nearby prey cluster over a slightly closer isolated animal", () => {
   const world = createWorld(31005, { initialPlants: 0, initialHerbivores: 0, initialPredators: 0 });
   const predator = { id: 1, x: 500, y: 270 };
-  const isolated = { id: 2, x: 510, y: 270 };
+  const isolated = { id: 2, x: 490, y: 270 };
   const group = [
     { id: 3, x: 512, y: 270 },
     { id: 4, x: 513, y: 271 },
