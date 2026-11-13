@@ -226,10 +226,14 @@ test("experiment scenarios provide isolated configuration overrides", () => {
 
 test("custom experiment parameters override only the selected scenario", () => {
   const scenario = getExperimentScenario("predator_pressure");
-  const result = runExperiment(123, 25, {
+  const result = runExperiment(123, 10, {
     ...scenario.config,
-    plantGrowthPerDay: 0
+    initialPlants: 0,
+    initialHerbivores: 0,
+    initialPredators: 0,
+    plantGrowthPerDay: 2
   });
-  assert.equal(result.final.plants, Math.max(0, scenario.config.initialPlants));
-  assert.equal(result.final.predators >= 0, true);
+  assert.equal(result.final.plants, 20);
+  assert.equal(result.final.herbivores, 0);
+  assert.equal(result.final.predators, 0);
 });
