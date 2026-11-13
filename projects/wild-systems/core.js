@@ -104,6 +104,7 @@ export function createWorld(seed = 1, overrides = {}) {
     day: 0,
     nextEventId: 1,
     events: [],
+    eventTotals: {},
     config,
     plants: [],
     herbivores: [],
@@ -122,6 +123,7 @@ export function createWorld(seed = 1, overrides = {}) {
 }
 
 function recordEvent(world, type, details = {}) {
+  world.eventTotals[type] = (world.eventTotals[type] ?? 0) + 1;
   world.events.push({
     id: world.nextEventId++,
     day: world.day,
@@ -278,6 +280,11 @@ export function restoreWorld(serialized) {
       !Number.isFinite(world.config.height) || world.config.height <= 0 ||
       world.day < 0 || world.nextId < 1 || world.nextEventId < 1) {
     throw new Error("El guardado contiene parámetros fuera de rango.");
+  }
+
+  world.eventTotals ??= {};
+  if (!world.eventTotals || typeof world.eventTotals !== "object" || Array.isArray(world.eventTotals)) {
+    throw new Error("El guardado contiene contadores de acontecimientos inválidos.");
   }
 
   const entities = [
