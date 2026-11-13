@@ -69,6 +69,7 @@ export function runExperiment(seed, days, config = {}) {
   validateInteger(days, "Los días", 1, 100000);
 
   const world = createWorld(seed, config);
+  const initialGenetics = getWorldStats(world).genetics;
   const sums = { plants: 0, herbivores: 0, predators: 0 };
   const peak = { ...getWorldStats(world) };
   const extinctionDays = {
@@ -94,6 +95,11 @@ export function runExperiment(seed, days, config = {}) {
   }
 
   const final = getWorldStats(world);
+  const geneticChange = Object.fromEntries(["herbivores", "predators"].map(species => [
+    species, Object.fromEntries(["speed", "metabolism", "efficiency"].map(trait => [
+      trait, Number((final.genetics[species][trait] - initialGenetics[species][trait]).toFixed(3))
+    ]))
+  ]));
   return {
     seed,
     days,
@@ -114,7 +120,9 @@ export function runExperiment(seed, days, config = {}) {
     },
     extinctionDays,
     eventTotals: { ...world.eventTotals },
-    genetics: final.genetics
+    initialGenetics,
+    genetics: final.genetics,
+    geneticChange
   };
 }
 
@@ -127,6 +135,9 @@ export function summarizeExperiments(results) {
   const averageGenetics = Object.fromEntries(["herbivores", "predators"].map(species => [
     species, { speed: 0, metabolism: 0, efficiency: 0, averageGeneration: 0 }
   ]));
+  const averageGeneticChange = Object.fromEntries(["herbivores", "predators"].map(species => [
+    species, { speed: 0, metabolism: 0, efficiency: 0 }
+  ]));
   for (const result of results) {
     for (const species of Object.keys(averageFinal)) {
       averageFinal[species] += result.final[species] / results.length;
@@ -135,11 +146,17 @@ export function summarizeExperiments(results) {
       for (const trait of Object.keys(averageGenetics[species])) {
         averageGenetics[species][trait] += (result.genetics?.[species]?.[trait] ?? 0) / results.length;
       }
+      for (const trait of Object.keys(averageGeneticChange[species])) {
+        averageGeneticChange[species][trait] += (result.geneticChange?.[species]?.[trait] ?? 0) / results.length;
+      }
     }
   }
   for (const species of ["herbivores", "predators"]) {
     for (const trait of Object.keys(averageGenetics[species])) {
       averageGenetics[species][trait] = Number(averageGenetics[species][trait].toFixed(3));
+    }
+    for (const trait of Object.keys(averageGeneticChange[species])) {
+      averageGeneticChange[species][trait] = Number(averageGeneticChange[species][trait].toFixed(3));
     }
   }
 
@@ -147,6 +164,7 @@ export function summarizeExperiments(results) {
     runs: results.length,
     averageFinal,
     averageGenetics,
+    averageGeneticChange,
     herbivoreExtinctionRate: Math.round(
       results.filter(result => result.extinctionDays.herbivores !== null).length / results.length * 100
     ),
