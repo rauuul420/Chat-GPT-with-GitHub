@@ -237,4 +237,64 @@ export function getWorldSnapshot(world) {
   return JSON.parse(JSON.stringify(world));
 }
 
+const SAVE_FORMAT = "wild-systems-save";
+const SAVE_VERSION = 1;
+
+export function serializeWorld(world) {
+  return JSON.stringify({
+    format: SAVE_FORMAT,
+    version: SAVE_VERSION,
+    world: getWorldSnapshot(world)
+  }, null, 2);
+}
+
+export function restoreWorld(serialized) {
+  let payload;
+  try {
+    payload = typeof serialized === "string" ? JSON.parse(serialized) : serialized;
+  } catch {
+    throw new Error("El archivo no contiene JSON válido.");
+  }
+
+  if (!payload || payload.format !== SAVE_FORMAT || payload.version !== SAVE_VERSION) {
+    throw new Error("El formato o la versión del guardado no son compatibles.");
+  }
+
+  const world = payload.world;
+  if (!world || !world.config ||
+      !Number.isInteger(world.seed) ||
+      !Number.isInteger(world.rngState) ||
+      !Number.isInteger(world.nextId) ||
+      !Number.isInteger(world.nextEventId) ||
+      !Number.isInteger(world.day) ||
+      !Array.isArray(world.plants) ||
+      !Array.isArray(world.herbivores) ||
+      !Array.isArray(world.predators) ||
+      !Array.isArray(world.events)) {
+    throw new Error("El guardado está incompleto o tiene una estructura incorrecta.");
+  }
+
+  if (!Number.isFinite(world.config.width) || world.config.width <= 0 ||
+      !Number.isFinite(world.config.height) || world.config.height <= 0 ||
+      world.day < 0 || world.nextId < 1 || world.nextEventId < 1) {
+    throw new Error("El guardado contiene parámetros fuera de rango.");
+  }
+
+  const entities = [
+    ...world.plants,
+    ...world.herbivores,
+    ...world.predators
+  ];
+  for (const entity of entities) {
+    if (!Number.isInteger(entity.id) ||
+        !Number.isFinite(entity.x) ||
+        !Number.isFinite(entity.y) ||
+        !Number.isFinite(entity.energy)) {
+      throw new Error("El guardado contiene una entidad inválida.");
+    }
+  }
+
+  return getWorldSnapshot(world);
+}
+
 export { DEFAULT_CONFIG };
