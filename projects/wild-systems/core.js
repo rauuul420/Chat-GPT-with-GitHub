@@ -426,17 +426,28 @@ export function stepWorld(world) {
 
 export function getWorldStats(world) {
   const summarizeTraits = population => {
-    if (population.length === 0) return { speed: 0, metabolism: 0, efficiency: 0, averageGeneration: 0 };
+    const keys = ["speed", "metabolism", "efficiency"];
     const totals = population.reduce((sum, animal) => {
-      sum.speed += animal.traits?.speed ?? 1;
-      sum.metabolism += animal.traits?.metabolism ?? 1;
-      sum.efficiency += animal.traits?.efficiency ?? 1;
+      for (const key of keys) sum[key] += animal.traits?.[key] ?? 1;
       sum.averageGeneration += animal.generation ?? 0;
       return sum;
     }, { speed: 0, metabolism: 0, efficiency: 0, averageGeneration: 0 });
-    return Object.fromEntries(Object.entries(totals).map(([key, value]) =>
-      [key, Number((value / population.length).toFixed(3))]
+    const averages = Object.fromEntries(Object.entries(totals).map(([key, value]) =>
+      [key, population.length ? Number((value / population.length).toFixed(3)) : 0]
     ));
+    const distribution = Object.fromEntries(keys.map(key => {
+      const values = population.map(animal => animal.traits?.[key] ?? 1);
+      const mean = population.length ? totals[key] / population.length : 0;
+      const variance = population.length
+        ? values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / population.length
+        : 0;
+      return [key, {
+        min: population.length ? Number(Math.min(...values).toFixed(3)) : 0,
+        max: population.length ? Number(Math.max(...values).toFixed(3)) : 0,
+        standardDeviation: Number(Math.sqrt(variance).toFixed(3))
+      }];
+    }));
+    return { ...averages, distribution };
   };
   const habitats = Object.fromEntries(
     ["aquatic", "wetland", "forest", "grassland", "arid", "barren"].map(biome => [
