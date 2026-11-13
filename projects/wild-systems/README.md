@@ -29,7 +29,8 @@ GitHub Actions runs the test suite when files in this project change.
 
 ## Current prototype
 
-- **Vegetation** regrows within a population cap, with seasonal growth rates.
+- **Vegetation** regrows within a population cap, with seasonal growth rates and a bias towards fertile, moist terrain cells.
+- **Terrain** is a deterministic 12 × 7 grid. Each cell has seeded fertility and moisture values that shape where plants initially appear and where regrowth is concentrated.
 - **Seasons and climate** follow a deterministic four-season calendar; temperature varies over the year and through reproducible weather oscillations. Seasonal conditions affect plant growth and animal energy costs.
 - **Herbivores** seek vegetation, consume energy, reproduce, and die.
 - **Predators** hunt herbivores and reproduce when sufficiently fed.
@@ -63,8 +64,9 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 
 ## Model and current limitations
 
-- The world is a continuous 2D plane with reflecting borders.
-- The seasonal year has four configurable seasons of 90 days each by default. Spring, summer, autumn and winter modify vegetation growth and daily energy costs; temperature is a deterministic indicator, not yet a physiological survival threshold.
+- The world is a continuous 2D plane with reflecting borders, overlaid by a 12 × 7 ecological grid.
+- Terrain fertility and moisture are currently static. Rainfall, soil depletion, water flow, and biome transitions are not modelled yet.
+- A new world starts in spring. The seasonal year has four configurable seasons of 90 days each by default. Spring, summer, autumn and winter modify vegetation growth and daily energy costs; temperature is a deterministic indicator, not yet a physiological survival threshold.
 - Organisms use nearest-target steering; there is no memory, territory, genetics, or social behaviour yet.
 - The model is an exploratory toy model, not a scientifically calibrated ecological model.
 - Predators act after the herbivore phase, so newly born herbivores can be hunted on the day they are born. Newborns do not otherwise take a turn in their birth phase.
@@ -93,6 +95,14 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Export experiment results as CSV.
 - [ ] Copyable experiment settings.
 
+### 0.6 — Spatial ecology
+- [x] Generate reproducible fertility and moisture maps from the world seed.
+- [x] Bias initial vegetation and regrowth towards resource-rich cells.
+- [x] Visualize spatial variation directly on the world map.
+- [x] Preserve terrain in saves and deterministically migrate older saves.
+- [x] Validate terrain structure when loading saves.
+- [x] Count predation as a herbivore death in lifetime event totals.
+
 ### 0.5 — A changing environment
 - [x] Add a deterministic four-season calendar.
 - [x] Add reproducible temperature variation.
@@ -101,7 +111,6 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Display the current season and temperature.
 
 ### 0.4 — More interesting worlds
-- [ ] Terrain and resource distribution.
 - [ ] Traits, inheritance, mutation, and selection.
 - [x] Five scenario presets for controlled experiments.
 - [x] Optional overrides for vegetation growth, energy costs, and predator speed.
