@@ -100,6 +100,10 @@ function drawWorld() {
     const alpha = (0.12 + cell.growthWeight * 0.22).toFixed(3);
     context.fillStyle = `rgba(70, ${green}, ${blue}, ${alpha})`;
     context.fillRect(cell.left, cell.top, cell.width, cell.height);
+    if (cell.surfaceWater > 0.035) {
+      context.fillStyle = `rgba(55, 145, 190, ${Math.min(0.48, cell.surfaceWater * 1.8).toFixed(3)})`;
+      context.fillRect(cell.left, cell.top, cell.width, cell.height);
+    }
   }
 
   context.strokeStyle = "#263a2a";
