@@ -321,12 +321,42 @@ function renderExperimentResults(results, summary) {
     `Extinción de herbívoros: ${summary.herbivoreExtinctionRate}% · depredadores: ${summary.predatorExtinctionRate}%.`;
 }
 
+element("experiment-scenario-description").textContent = getExperimentScenario(element("experiment-scenario").value).description;
+element("experiment-scenario").addEventListener("change", () => {
+  element("experiment-scenario-description").textContent =
+    getExperimentScenario(element("experiment-scenario").value).description;
+});
+
 let lastExperimentResults = [];
 
 element("run-experiment").addEventListener("click", async () => {
   const runs = Number(element("experiment-runs").value);
   const days = Number(element("experiment-days").value);
   const baseSeed = Number(element("experiment-seed").value);
+  const customConfig = {};
+  const parameterDefinitions = [
+    ["experiment-plant-growth", "plantGrowthPerDay", 0, 20, true],
+    ["experiment-herbivore-cost", "herbivoreDailyCost", 0.01, 5, false],
+    ["experiment-predator-cost", "predatorDailyCost", 0.01, 5, false],
+    ["experiment-predator-speed", "predatorSpeed", 0.1, 3, false]
+  ];
+  let invalidParameter = false;
+  for (const [id, key, minimum, maximum, integer] of parameterDefinitions) {
+    const raw = element(id).value.trim();
+    if (raw === "") continue;
+    const value = Number(raw);
+    if (!Number.isFinite(value) || value < minimum || value > maximum ||
+        (integer && !Number.isInteger(value))) {
+      invalidParameter = true;
+      break;
+    }
+    customConfig[key] = value;
+  }
+
+  if (invalidParameter) {
+    element("experiment-status").textContent = "Hay un parámetro fuera de rango. Revisa los límites indicados.";
+    return;
+  }
 
   if (!Number.isInteger(runs) || runs < 1 || runs > 20 ||
       !Number.isInteger(days) || days < 1 || days > 3000 ||
@@ -336,9 +366,11 @@ element("run-experiment").addEventListener("click", async () => {
   }
 
   const scenario = getExperimentScenario(element("experiment-scenario").value);
+  const experimentConfig = { ...scenario.config, ...customConfig };
   const button = element("run-experiment");
   button.disabled = true;
   element("experiment-scenario").disabled = true;
+  for (const id of ["experiment-plant-growth","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed"]) element(id).disabled = true;
   lastExperimentResults = [];
   element("experiment-results").replaceChildren();
   element("experiment-summary").textContent = "";
@@ -347,9 +379,10 @@ element("run-experiment").addEventListener("click", async () => {
   try {
     for (let index = 0; index < runs; index++) {
       const seed = (baseSeed + Math.imul(index, 0x9E3779B9)) >>> 0;
-      const result = runExperiment(seed, days, scenario.config);
+      const result = runExperiment(seed, days, experimentConfig);
       result.scenario = scenario.id;
       result.scenarioLabel = scenario.label;
+      result.config = experimentConfig;
       lastExperimentResults.push(result);
       element("experiment-status").textContent = `Ejecutando experimento ${index + 1} de ${runs}…`;
       await new Promise(resolve => requestAnimationFrame(() => resolve()));
@@ -363,6 +396,7 @@ element("run-experiment").addEventListener("click", async () => {
   } finally {
     button.disabled = false;
     element("experiment-scenario").disabled = false;
+    for (const id of ["experiment-plant-growth","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed"]) element(id).disabled = false;
   }
 });
 
@@ -372,13 +406,13 @@ element("export-experiments").addEventListener("click", () => {
     return;
   }
 
-  const headers = ["scenario","seed","days","final_plants","final_herbivores","final_predators","herbivore_extinction_day","predator_extinction_day","mean_plants","mean_herbivores","mean_predators","peak_plants","peak_herbivores","peak_predators","event_totals_json"];
+  const headers = ["scenario","seed","days","final_plants","final_herbivores","final_predators","herbivore_extinction_day","predator_extinction_day","mean_plants","mean_herbivores","mean_predators","peak_plants","peak_herbivores","peak_predators","event_totals_json","config_json"];
   const rows = lastExperimentResults.map(result => [
     result.scenario, result.seed, result.days, result.final.plants, result.final.herbivores,
     result.final.predators, result.extinctionDays.herbivores ?? "",
     result.extinctionDays.predators ?? "", result.mean.plants,
     result.mean.herbivores, result.mean.predators, result.peak.plants,
-    result.peak.herbivores, result.peak.predators, JSON.stringify(result.eventTotals)
+    result.peak.herbivores, result.peak.predators, JSON.stringify(result.eventTotals), JSON.stringify(result.config)
   ]);
   const csv = [headers, ...rows].map(row =>
     row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")
