@@ -257,6 +257,7 @@ export function stepWorld(world) {
     if (prey && distance(predator, prey) < 11) {
       predator.energy += config.predatorFoodGain;
       recordEvent(world, "predation", { predatorId: predator.id, preyId: prey.id });
+      recordEvent(world, "herbivore_death", { organismId: prey.id, cause: "predation", predatorId: predator.id });
       const preyIndex = world.herbivores.findIndex(item => item.id === prey.id);
       if (preyIndex !== -1) world.herbivores.splice(preyIndex, 1);
     }
@@ -340,9 +341,19 @@ export function restoreWorld(serialized) {
 
   world.config = { ...DEFAULT_CONFIG, ...world.config };
   world.terrain ??= createTerrain(world.seed, world.config);
-  if (!world.terrain || !Array.isArray(world.terrain.cells) ||
+  if (!world.terrain ||
+      !Number.isInteger(world.terrain.columns) || world.terrain.columns < 2 || world.terrain.columns > 40 ||
+      !Number.isInteger(world.terrain.rows) || world.terrain.rows < 2 || world.terrain.rows > 30 ||
+      !Array.isArray(world.terrain.cells) ||
       world.terrain.cells.length !== world.terrain.columns * world.terrain.rows ||
-      world.terrain.cells.some(cell => !Number.isFinite(cell.fertility) || !Number.isFinite(cell.moisture) || cell.fertility < 0 || cell.fertility > 1 || cell.moisture < 0 || cell.moisture > 1)) {
+      world.terrain.cells.some((cell, index) =>
+        !cell || cell.id !== index ||
+        !Number.isFinite(cell.fertility) || cell.fertility < 0 || cell.fertility > 1 ||
+        !Number.isFinite(cell.moisture) || cell.moisture < 0 || cell.moisture > 1 ||
+        !Number.isFinite(cell.growthWeight) || cell.growthWeight < 0 || cell.growthWeight > 1 ||
+        !Number.isFinite(cell.left) || !Number.isFinite(cell.top) ||
+        !Number.isFinite(cell.width) || cell.width <= 0 ||
+        !Number.isFinite(cell.height) || cell.height <= 0)) {
     throw new Error("El guardado contiene un terreno inválido.");
   }
 
