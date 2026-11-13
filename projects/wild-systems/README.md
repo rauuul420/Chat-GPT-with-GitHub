@@ -56,7 +56,7 @@ projects/wild-systems/
 
 ## Experiment laboratory
 
-The browser laboratory can run 1–20 independent worlds for up to 3,000 days per world. Choose one of five scenarios, then run independent seeds derived deterministically from the base seed. Results include final, mean, and peak populations, first extinction day for herbivores and predators, and event totals. Export the run table as CSV for analysis. Batch execution yields between runs so the page can repaint and report progress.
+The browser laboratory can run 1–20 independent worlds for up to 3,000 days per world. Choose one of five scenarios, optionally override vegetation growth, daily energy costs, and predator speed, then run independent seeds derived deterministically from the base seed. Results include final, mean, and peak populations, first extinction day for herbivores and predators, and event totals. Export the run table as CSV for analysis. Batch execution yields between runs so the page can repaint and report progress.
 
 ## Model and current limitations
 
@@ -94,7 +94,7 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [ ] Terrain and resource distribution.
 - [ ] Traits, inheritance, mutation, and selection.
 - [x] Five scenario presets for controlled experiments.
-- [ ] Editable simulation parameters and custom scenario saving.
+- [x] Optional overrides for vegetation growth, energy costs, and predator speed.\n- [ ] Save and share custom scenario configurations.
 
 ## Validation questions
 
