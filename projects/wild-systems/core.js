@@ -11,6 +11,8 @@ const DEFAULT_CONFIG = Object.freeze({
   maxPredators: 45,
   plantGrowthPerDay: 3,
   seasonLengthDays: 90,
+  terrainColumns: 12,
+  terrainRows: 7,
   herbivoreSpeed: 0.85,
   predatorSpeed: 1.05,
   herbivoreDailyCost: 0.19,
@@ -50,6 +52,54 @@ function nearest(items, source) {
   return candidate;
 }
 
+function hashTerrain(seed, x, y, salt) {
+  let value = (seed ^ Math.imul(x + 1, 0x9E3779B1) ^ Math.imul(y + 1, 0x85EBCA77) ^ salt) >>> 0;
+  value ^= value >>> 16;
+  value = Math.imul(value, 0x7FEB352D);
+  value ^= value >>> 15;
+  value = Math.imul(value, 0x846CA68B);
+  value ^= value >>> 16;
+  return (value >>> 0) / 4294967296;
+}
+
+export function createTerrain(seed, config = DEFAULT_CONFIG) {
+  const columns = config.terrainColumns ?? DEFAULT_CONFIG.terrainColumns;
+  const rows = config.terrainRows ?? DEFAULT_CONFIG.terrainRows;
+  if (!Number.isInteger(columns) || columns < 2 || columns > 40 ||
+      !Number.isInteger(rows) || rows < 2 || rows > 30) {
+    throw new RangeError("La cuadrícula del terreno debe tener entre 2–40 columnas y 2–30 filas.");
+  }
+  const cellWidth = config.width / columns;
+  const cellHeight = config.height / rows;
+  const cells = [];
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < columns; x++) {
+      const fertility = 0.2 + hashTerrain(seed, x, y, 0xA341316C) * 0.8;
+      const moisture = 0.15 + hashTerrain(seed, x, y, 0xC8013EA4) * 0.85;
+      cells.push({
+        id: y * columns + x, x, y,
+        left: x * cellWidth, top: y * cellHeight,
+        width: cellWidth, height: cellHeight,
+        fertility: Number(fertility.toFixed(4)),
+        moisture: Number(moisture.toFixed(4)),
+        growthWeight: Number((fertility * moisture).toFixed(4))
+      });
+    }
+  }
+  return { columns, rows, cells };
+}
+
+function chooseTerrainCell(world) {
+  const cells = world.terrain.cells;
+  const totalWeight = cells.reduce((sum, cell) => sum + cell.growthWeight, 0);
+  let selection = random(world, 0, totalWeight);
+  for (const cell of cells) {
+    selection -= cell.growthWeight;
+    if (selection <= 0) return cell;
+  }
+  return cells[cells.length - 1];
+}
+
 function createAnimal(world, species, config, x, y) {
   const herbivore = species === "herbivore";
   return {
@@ -63,12 +113,14 @@ function createAnimal(world, species, config, x, y) {
   };
 }
 
-function createPlant(world, config) {
+function createPlant(world, config, selectedCell = null) {
+  const cell = selectedCell ?? chooseTerrainCell(world);
   return {
     id: world.nextId++,
-    x: random(world, 5, config.width - 5),
-    y: random(world, 5, config.height - 5),
-    energy: random(world, 0.3, 1)
+    x: random(world, cell.left + 5, cell.left + cell.width - 5),
+    y: random(world, cell.top + 5, cell.top + cell.height - 5),
+    energy: random(world, 0.3, 1),
+    terrainCellId: cell.id
   };
 }
 
@@ -110,6 +162,7 @@ export function createWorld(seed = 1, overrides = {}) {
     events: [],
     eventTotals: {},
     config,
+    terrain: createTerrain(normalizedSeed, config),
     plants: [],
     herbivores: [],
     predators: []
@@ -286,6 +339,12 @@ export function restoreWorld(serialized) {
   }
 
   world.config = { ...DEFAULT_CONFIG, ...world.config };
+  world.terrain ??= createTerrain(world.seed, world.config);
+  if (!world.terrain || !Array.isArray(world.terrain.cells) ||
+      world.terrain.cells.length !== world.terrain.columns * world.terrain.rows ||
+      world.terrain.cells.some(cell => !Number.isFinite(cell.fertility) || !Number.isFinite(cell.moisture) || cell.fertility < 0 || cell.fertility > 1 || cell.moisture < 0 || cell.moisture > 1)) {
+    throw new Error("El guardado contiene un terreno inválido.");
+  }
 
   if (!Number.isFinite(world.config.width) || world.config.width <= 0 ||
       !Number.isFinite(world.config.height) || world.config.height <= 0 ||
