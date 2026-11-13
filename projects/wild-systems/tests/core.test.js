@@ -848,3 +848,29 @@ test("experiment settings reject malformed files, unknown scenarios and unsafe p
   assert.throws(() => restoreExperimentSettings({ ...base, config: { untrustedSetting: 1 } }), /no está permitido/);
   assert.throws(() => restoreExperimentSettings({ ...base, runs: 0 }), /entre 1 y 20/);
 });
+
+
+test("experiment population variability is deterministic and non-negative", () => {
+  const first = runExperiment(77118, 180);
+  const second = runExperiment(77118, 180);
+  assert.deepEqual(first.variability, second.variability);
+  for (const species of ["plants", "herbivores", "predators"]) {
+    assert.ok(first.variability[species].standardDeviation >= 0);
+    assert.ok(first.variability[species].coefficientOfVariation >= 0);
+  }
+});
+
+test("extinct populations have zero variability and zero coefficient of variation", () => {
+  const result = runExperiment(77119, 25, {
+    initialPlants: 0, initialHerbivores: 0, initialPredators: 0,
+    plantGrowthPerDay: 0
+  });
+  for (const species of ["plants", "herbivores", "predators"]) {
+    assert.deepEqual(result.variability[species], {
+      standardDeviation: 0,
+      coefficientOfVariation: 0
+    });
+  }
+  const summary = summarizeExperiments([result, result]);
+  assert.equal(summary.averageVariability.herbivores.coefficientOfVariation, 0);
+});
