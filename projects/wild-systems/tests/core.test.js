@@ -76,22 +76,51 @@ test("snapshots are detached copies", () => {
   assert.notEqual(world.plants[0].x, -100);
 });
 
-test("simulation events are structured and dated", () => {
-  const world = createWorld(20261113);
-  for (let day = 0; day < 250; day++) stepWorld(world);
+test("feeding events are structured and dated", () => {
+  const world = createWorld(20261113, {
+    initialPlants: 0,
+    initialHerbivores: 1,
+    initialPredators: 0,
+    plantGrowthPerDay: 0
+  });
+  const herbivore = world.herbivores[0];
+  world.plants.push({
+    id: world.nextId++,
+    x: herbivore.x,
+    y: herbivore.y,
+    energy: 1
+  });
 
-  assert.ok(world.events.length > 0);
-  assert.ok(world.events.length <= 200);
-  for (const event of world.events) {
-    assert.ok(Number.isInteger(event.id));
-    assert.ok(Number.isInteger(event.day));
-    assert.ok(event.day > 0 && event.day <= world.day);
-    assert.equal(typeof event.type, "string");
-  }
+  stepWorld(world);
+  const event = world.events.find(item => item.type === "herbivore_feeding");
+  assert.ok(event);
+  assert.equal(event.day, 1);
+  assert.equal(event.organismId, herbivore.id);
 });
 
-test("event history is bounded", () => {
-  const world = createWorld(2026);
-  for (let day = 0; day < 600; day++) stepWorld(world);
-  assert.ok(world.events.length <= 200);
+test("event history stays bounded when a new event is recorded", () => {
+  const world = createWorld(2026, {
+    initialPlants: 0,
+    initialHerbivores: 1,
+    initialPredators: 0,
+    plantGrowthPerDay: 0
+  });
+  const herbivore = world.herbivores[0];
+  world.plants.push({
+    id: world.nextId++,
+    x: herbivore.x,
+    y: herbivore.y,
+    energy: 1
+  });
+  world.events = Array.from({ length: 200 }, (_, index) => ({
+    id: index + 1,
+    day: 0,
+    type: "test"
+  }));
+  world.nextEventId = 201;
+
+  stepWorld(world);
+  assert.equal(world.events.length, 200);
+  assert.equal(world.events[0].id, 2);
+  assert.equal(world.events.at(-1).type, "herbivore_feeding");
 });
