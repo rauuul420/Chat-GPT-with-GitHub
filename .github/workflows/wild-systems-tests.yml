@@ -1,0 +1,28 @@
+name: Wild Systems tests
+
+on:
+  push:
+    paths:
+      - "projects/wild-systems/**"
+      - ".github/workflows/wild-systems-tests.yml"
+  pull_request:
+    paths:
+      - "projects/wild-systems/**"
+      - ".github/workflows/wild-systems-tests.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/wild-systems
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run simulation tests
+        run: npm test
