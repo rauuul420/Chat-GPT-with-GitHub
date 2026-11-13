@@ -1,5 +1,6 @@
 import { createWorld, stepWorld, getWorldStats, serializeWorld, restoreWorld } from "./core.js";
 import { runExperiment, summarizeExperiments, getExperimentScenario } from "./experiments.js";
+import { getEnvironment } from "./environment.js";
 
 const canvas = document.querySelector("#world");
 const context = canvas.getContext("2d");
@@ -82,6 +83,8 @@ function updateStats() {
   element("pred").textContent = stats.predators;
   element("plants").textContent = stats.plants;
   element("day").textContent = stats.day;
+  const environment = getEnvironment(world.day, world.config);
+  element("environment").textContent = `${environment.seasonLabel} · ${environment.temperature} °C · Día ${environment.dayInSeason}/${environment.seasonLengthDays}`;
   element("speed").textContent = `${speed}× velocidad`;
   renderEvents();
   renderInspector();
