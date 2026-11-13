@@ -94,12 +94,15 @@ function drawWorld() {
   context.fillStyle = "#17261b";
   context.fillRect(0, 0, width, height);
 
+  const biomeColors = {
+    aquatic: "#285b79", wetland: "#477b70", forest: "#315b39",
+    grassland: "#718b45", arid: "#9a8050", barren: "#686c61"
+  };
   for (const cell of world.terrain.cells) {
-    const green = Math.round(48 + cell.fertility * 54);
-    const blue = Math.round(28 + cell.moisture * 30);
-    const alpha = (0.12 + cell.growthWeight * 0.22).toFixed(3);
-    context.fillStyle = `rgba(70, ${green}, ${blue}, ${alpha})`;
+    context.globalAlpha = 0.28 + cell.growthWeight * 0.42;
+    context.fillStyle = biomeColors[cell.biome] ?? "#52634b";
     context.fillRect(cell.left, cell.top, cell.width, cell.height);
+    context.globalAlpha = 1;
     if (cell.surfaceWater > 0.035) {
       context.fillStyle = `rgba(55, 145, 190, ${Math.min(0.48, cell.surfaceWater * 1.8).toFixed(3)})`;
       context.fillRect(cell.left, cell.top, cell.width, cell.height);
