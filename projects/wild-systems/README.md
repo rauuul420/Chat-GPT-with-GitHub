@@ -30,8 +30,8 @@ GitHub Actions runs the test suite when files in this project change.
 ## Current prototype
 
 - **Vegetation** regrows within a population cap, with seasonal growth rates and a bias towards fertile, moist terrain cells.
-- **Terrain** is a deterministic 12 × 7 grid. Each cell has seeded fertility and evolving moisture values that shape where plants initially appear and where regrowth is concentrated.
-- **Seasons and climate** follow a deterministic four-season calendar; temperature varies over the year and through reproducible weather oscillations. Seasonal conditions affect plant growth and animal energy costs.
+- **Terrain** is a deterministic 12 × 7 grid. Each cell has seeded fertility, elevation, soil moisture and surface water; these shape vegetation and local water availability.
+- **Seasons and climate** follow a deterministic four-season calendar. Seasonal rainfall and evaporation feed a local water cycle: rain accumulates on the surface, infiltrates soil, evaporates or runs towards lower neighbouring cells. Soil moisture and surface water remain separate state variables.
 - **Herbivores** seek vegetation, consume energy, reproduce, and die.
 - **Predators** hunt herbivores and reproduce when sufficiently fed.
 - Pause, resume, advance one day, reset, and adjust simulation speed.
@@ -65,7 +65,7 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 ## Model and current limitations
 
 - The world is a continuous 2D plane with reflecting borders, overlaid by a 12 × 7 ecological grid.
-- Soil moisture changes gradually with seasonal rainfall and local deterministic weather. Water flow, groundwater, soil depletion, and biome transitions are not modelled yet.
+- The hydrology model is intentionally simplified: it represents surface runoff between neighbouring cells, infiltration and evaporation, but not groundwater, river networks, erosion or calibrated water volumes. Plant growth is still a population-level regrowth budget distributed by local habitat suitability.
 - A new world starts in spring. The seasonal year has four configurable seasons of 90 days each by default. Spring, summer, autumn and winter modify vegetation growth and daily energy costs; temperature is a deterministic indicator, not yet a physiological survival threshold.
 - Organisms use nearest-target steering; there is no memory, territory, genetics, or social behaviour yet.
 - The model is an exploratory toy model, not a scientifically calibrated ecological model.
@@ -95,7 +95,7 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Export experiment results as CSV.
 - [ ] Copyable experiment settings.
 
-### 0.6 — Spatial ecology
+### 0.7 — Local hydrology\n- [x] Separate surface water from soil moisture.\n- [x] Add seasonal rainfall and temperature-sensitive evaporation.\n- [x] Route excess surface water towards lower neighbouring cells.\n- [x] Make vegetation placement respond to moisture suitability, not simply wetter-is-better.\n- [x] Migrate 0.6 terrain saves to the hydrology-aware schema.\n\n### 0.6 — Spatial ecology
 - [x] Generate reproducible fertility and moisture maps from the world seed.
 - [x] Bias initial vegetation and regrowth towards resource-rich cells.
 - [x] Visualize spatial variation directly on the world map.
