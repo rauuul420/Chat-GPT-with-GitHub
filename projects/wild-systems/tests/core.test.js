@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createWorld, stepWorld, getWorldStats, getWorldSnapshot, serializeWorld, restoreWorld } from "../core.js";
+import { createWorld, createTerrain, stepWorld, getWorldStats, getWorldSnapshot, serializeWorld, restoreWorld } from "../core.js";
 import { runExperiment, summarizeExperiments, getExperimentScenario, EXPERIMENT_SCENARIOS } from "../experiments.js";
 import { getEnvironment } from "../environment.js";
 
@@ -240,6 +240,8 @@ test("custom experiment parameters override only the selected scenario", () => {
 });
 
 test("the seasonal calendar changes at exact configured boundaries", () => {
+  assert.equal(getEnvironment(0).season, "spring");
+  assert.equal(getEnvironment(0).dayInSeason, 1);
   assert.equal(getEnvironment(1).season, "spring");
   assert.equal(getEnvironment(90).season, "spring");
   assert.equal(getEnvironment(91).season, "summer");
@@ -285,4 +287,47 @@ test("legacy saves restore with a default seasonal growth accumulator", () => {
   assert.equal(restored.plantGrowthRemainder, 0);
   assert.equal(restored.config.seasonLengthDays, 90);
   assert.equal(getEnvironment(91, restored.config).season, "summer");
+});
+
+test("terrain is reproducible, spatially varied, and independent of simulation RNG", () => {
+  const first = createTerrain(13579);
+  const second = createTerrain(13579);
+  assert.deepEqual(first, second);
+  assert.equal(first.cells.length, 84);
+  assert.ok(new Set(first.cells.map(cell => cell.fertility)).size > 50);
+  assert.ok(new Set(first.cells.map(cell => cell.moisture)).size > 50);
+  assert.ok(first.cells.every(cell => cell.growthWeight > 0 && cell.growthWeight <= 1));
+  assert.throws(() => createTerrain(1, { width: 960, height: 540, terrainColumns: 1, terrainRows: 7 }), /cuadrícula/);
+});
+
+test("initial vegetation is assigned to terrain cells and biased by local resources", () => {
+  const world = createWorld(24680);
+  assert.equal(world.terrain.cells.length, 84);
+  assert.ok(world.plants.every(plant => Number.isInteger(plant.terrainCellId)));
+  const counts = new Array(world.terrain.cells.length).fill(0);
+  for (const plant of world.plants) counts[plant.terrainCellId]++;
+  const fertile = world.terrain.cells.reduce((best, cell) => cell.growthWeight > best.growthWeight ? cell : best);
+  const barren = world.terrain.cells.reduce((worst, cell) => cell.growthWeight < worst.growthWeight ? cell : worst);
+  assert.ok(counts[fertile.id] > counts[barren.id]);
+});
+
+test("terrain survives saves and legacy worlds regenerate it deterministically", () => {
+  const world = createWorld(97531);
+  const restored = restoreWorld(serializeWorld(world));
+  assert.deepEqual(restored.terrain, world.terrain);
+  const legacy = JSON.parse(serializeWorld(world));
+  delete legacy.world.terrain;
+  const migrated = restoreWorld(legacy);
+  assert.deepEqual(migrated.terrain, world.terrain);
+  assert.deepEqual(restoreWorld(legacy).terrain, world.terrain);
+});
+
+test("seeded terrain does not break deterministic world evolution", () => {
+  const first = createWorld(86420);
+  const second = createWorld(86420);
+  for (let day = 0; day < 180; day++) {
+    stepWorld(first);
+    stepWorld(second);
+  }
+  assert.deepEqual(first, second);
 });
