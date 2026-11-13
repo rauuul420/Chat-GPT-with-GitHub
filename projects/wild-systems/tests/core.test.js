@@ -377,7 +377,8 @@ test("seasonal weather changes local soil moisture within safe bounds", () => {
   assert.ok(world.terrain.cells.every(cell => cell.moisture >= 0.08 && cell.moisture <= 0.98));
   assert.ok(world.terrain.cells.every(cell => {
     const suitability = Math.max(0.05, 1 - Math.abs(cell.moisture - 0.62) / 0.62);
-    return cell.growthWeight === Number((cell.fertility * suitability).toFixed(4));
+    const biomeFactor = { aquatic: 0.12, wetland: 0.72, forest: 1.08, grassland: 1, arid: 0.48, barren: 0.32 }[cell.biome];
+    return cell.growthWeight === Number((cell.fertility * suitability * biomeFactor).toFixed(4));
   }));
 });
 
