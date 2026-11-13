@@ -184,3 +184,71 @@ export function summarizeExperiments(results) {
     )
   };
 }
+
+
+export const EXPERIMENT_PARAMETER_DEFINITIONS = Object.freeze([
+  Object.freeze({ id: "experiment-plant-growth", key: "plantGrowthPerDay", min: 0, max: 20, integer: true }),
+  Object.freeze({ id: "experiment-season-length", key: "seasonLengthDays", min: 30, max: 180, integer: true }),
+  Object.freeze({ id: "experiment-herbivore-cost", key: "herbivoreDailyCost", min: 0.01, max: 5, integer: false }),
+  Object.freeze({ id: "experiment-predator-cost", key: "predatorDailyCost", min: 0.01, max: 5, integer: false }),
+  Object.freeze({ id: "experiment-predator-speed", key: "predatorSpeed", min: 0.1, max: 3, integer: false }),
+  Object.freeze({ id: "experiment-herbivore-maturity", key: "herbivoreMaturityAge", min: 1, max: 365, integer: true }),
+  Object.freeze({ id: "experiment-predator-maturity", key: "predatorMaturityAge", min: 1, max: 365, integer: true })
+]);
+
+const EXPERIMENT_SETTINGS_FORMAT = "wild-systems-experiment-settings";
+const EXPERIMENT_SETTINGS_VERSION = 1;
+
+function normalizeExperimentSettings(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("La configuración del experimento debe ser un objeto JSON.");
+  }
+  const scenario = getExperimentScenario(value.scenario);
+  validateInteger(value.runs, "Las ejecuciones", 1, 20);
+  validateInteger(value.days, "Los días por mundo", 1, 3000);
+  validateInteger(value.baseSeed, "La semilla base", 0, 0xFFFFFFFF);
+  const suppliedConfig = value.config ?? {};
+  if (!suppliedConfig || typeof suppliedConfig !== "object" || Array.isArray(suppliedConfig)) {
+    throw new Error("Los parámetros de la configuración no son válidos.");
+  }
+  const config = {};
+  for (const [key, parameter] of Object.entries(suppliedConfig)) {
+    const definition = EXPERIMENT_PARAMETER_DEFINITIONS.find(item => item.key === key);
+    if (!definition) throw new RangeError(`El parámetro ${key} no está permitido en una configuración compartida.`);
+    if (!Number.isFinite(parameter) || parameter < definition.min || parameter > definition.max ||
+        (definition.integer && !Number.isInteger(parameter))) {
+      throw new RangeError(`El parámetro ${key} debe estar entre ${definition.min} y ${definition.max}${definition.integer ? " y ser entero" : ""}.`);
+    }
+    config[key] = parameter;
+  }
+  return {
+    scenario: scenario.id,
+    config,
+    runs: value.runs,
+    days: value.days,
+    baseSeed: value.baseSeed
+  };
+}
+
+export function serializeExperimentSettings(settings) {
+  const normalized = normalizeExperimentSettings(settings);
+  return JSON.stringify({
+    format: EXPERIMENT_SETTINGS_FORMAT,
+    version: EXPERIMENT_SETTINGS_VERSION,
+    ...normalized
+  }, null, 2);
+}
+
+export function restoreExperimentSettings(serialized) {
+  let payload;
+  try {
+    payload = typeof serialized === "string" ? JSON.parse(serialized) : serialized;
+  } catch {
+    throw new Error("El archivo de configuración no contiene JSON válido.");
+  }
+  if (!payload || payload.format !== EXPERIMENT_SETTINGS_FORMAT ||
+      payload.version !== EXPERIMENT_SETTINGS_VERSION) {
+    throw new Error("El formato o la versión de la configuración no son compatibles.");
+  }
+  return normalizeExperimentSettings(payload);
+}
