@@ -29,7 +29,7 @@ GitHub Actions runs the test suite when files in this project change.
 
 ## Current prototype
 
-**Version 0.11.0 — maturation and life-history dynamics.** Animal target selection accounts for biome affinity and local resource or prey concentration. Individuals carry heritable speed, metabolism and feeding-efficiency traits; offspring inherit their parent's traits with small random mutations. Juveniles must reach species-specific maturity before reproducing.
+**Version 0.12.0 — shareable experiment settings.** Animal target selection accounts for biome affinity and local resource or prey concentration. Individuals carry heritable speed, metabolism and feeding-efficiency traits; offspring inherit their parent's traits with small random mutations. Juveniles must reach species-specific maturity before reproducing.
 
 - **Vegetation** regrows within a population cap, with seasonal growth rates and a bias towards fertile, moist terrain cells.
 - **Terrain and biomes** form a deterministic 12 × 7 grid. Fertility, elevation, soil moisture and surface water drive six changing habitat classes: aquatic, wetland, forest, grassland, arid and barren. Each biome modifies local vegetation suitability.
@@ -118,6 +118,11 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Track generation and parent lineage, including save migration.
 - [x] Expose live trait averages and ranges for both populations.
 - [x] Measure initial-to-final trait shifts across experiment batches and export selection indicators to CSV.
+
+### 0.12 — Reproducible experiment configurations
+- [x] Export experiment settings as versioned JSON.
+- [x] Import settings with strict scenario, parameter, and run-limit validation.
+- [x] Preserve accumulated results when loading a new configuration.
 
 ### 0.11 — Life-history dynamics
 - [x] Add species-specific juvenile maturation before reproduction.
