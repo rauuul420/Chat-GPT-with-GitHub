@@ -2,6 +2,13 @@
 
 Notable changes to Wild Systems are documented here.
 
+## [0.12.0] — 2026-11-13
+
+- Added validated JSON export/import for reproducible experiment settings.
+- Preserved accumulated experiment results when importing a new settings file.
+- Added automated tests for settings round-trips and invalid configuration rejection.
+
+
 ## [0.11.0] — 2026-11-13
 
 - Added species-specific juvenile maturation: herbivores mature at 30 days and predators at 45 days by default.
