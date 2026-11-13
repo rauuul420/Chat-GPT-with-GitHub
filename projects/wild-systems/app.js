@@ -477,7 +477,7 @@ element("run-experiment").addEventListener("click", async () => {
     button.disabled = false;
     element("clear-experiments").disabled = false;
     element("experiment-scenario").disabled = false;
-    for (const id of ["experiment-plant-growth","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed"]) element(id).disabled = false;
+    for (const id of ["experiment-plant-growth","experiment-season-length","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed"]) element(id).disabled = false;
   }
 });
 
