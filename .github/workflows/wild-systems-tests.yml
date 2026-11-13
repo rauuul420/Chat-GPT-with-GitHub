@@ -24,5 +24,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Check JavaScript syntax
+        run: npm run check
       - name: Run simulation tests
         run: npm test
