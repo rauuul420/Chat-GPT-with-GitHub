@@ -17,7 +17,7 @@ export function getEnvironment(day, config = {}) {
   }
 
   const yearLength = seasonLength * SEASONS.length;
-  const dayOfYear = day === 0 ? yearLength - 1 : (day - 1) % yearLength;
+  const dayOfYear = Math.max(0, day - 1) % yearLength;
   const seasonIndex = Math.floor(dayOfYear / seasonLength);
   const season = SEASONS[seasonIndex];
   const dayInSeason = dayOfYear % seasonLength;
