@@ -84,7 +84,7 @@ export function createTerrain(seed, config = DEFAULT_CONFIG) {
         moisture: Number(moisture.toFixed(4)),
         surfaceWater: 0.02,
         elevation: Number(hashTerrain(seed, x, y, 0xAD90777D).toFixed(4)),
-        growthWeight: Number((fertility * moisture).toFixed(4))
+        growthWeight: Number((fertility * Math.max(0.05, 1 - Math.abs(moisture - 0.62) / 0.62)).toFixed(4))
       });
     }
   }
