@@ -363,3 +363,32 @@ test("restore rejects malformed terrain dimensions and cell values", () => {
   invalidCell.world.terrain.cells[0].moisture = 4;
   assert.throws(() => restoreWorld(invalidCell), /terreno inválido/);
 });
+
+test("seasonal weather changes local soil moisture within safe bounds", () => {
+  const world = createWorld(54321, {
+    initialPlants: 0,
+    initialHerbivores: 0,
+    initialPredators: 0,
+    plantGrowthPerDay: 0
+  });
+  const initial = world.terrain.cells.map(cell => cell.moisture);
+  for (let day = 0; day < 90; day++) stepWorld(world);
+  assert.ok(world.terrain.cells.some((cell, index) => cell.moisture !== initial[index]));
+  assert.ok(world.terrain.cells.every(cell => cell.moisture >= 0.08 && cell.moisture <= 0.98));
+  assert.ok(world.terrain.cells.every(cell => cell.growthWeight === Number((cell.fertility * cell.moisture).toFixed(4))));
+});
+
+test("seasonal soil moisture is reproducible across identical worlds and saves", () => {
+  const first = createWorld(67890);
+  const second = createWorld(67890);
+  for (let day = 0; day < 365; day++) {
+    stepWorld(first);
+    stepWorld(second);
+  }
+  assert.deepEqual(first.terrain, second.terrain);
+  const restored = restoreWorld(serializeWorld(first));
+  assert.deepEqual(restored.terrain, first.terrain);
+  stepWorld(first);
+  stepWorld(restored);
+  assert.deepEqual(restored, first);
+});
