@@ -29,7 +29,7 @@ GitHub Actions runs the test suite when files in this project change.
 
 ## Current prototype
 
-**Version 0.10.0 — inherited traits and natural selection.** Animal target selection accounts for biome affinity and local resource or prey concentration. Individuals now carry heritable speed, metabolism and feeding-efficiency traits; offspring inherit their parent's traits with small random mutations, and trait effects influence movement, energy use and food gains.
+**Version 0.11.0 — maturation and life-history dynamics.** Animal target selection accounts for biome affinity and local resource or prey concentration. Individuals carry heritable speed, metabolism and feeding-efficiency traits; offspring inherit their parent's traits with small random mutations. Juveniles must reach species-specific maturity before reproducing.
 
 - **Vegetation** regrows within a population cap, with seasonal growth rates and a bias towards fertile, moist terrain cells.
 - **Terrain and biomes** form a deterministic 12 × 7 grid. Fertility, elevation, soil moisture and surface water drive six changing habitat classes: aquatic, wetland, forest, grassland, arid and barren. Each biome modifies local vegetation suitability.
@@ -37,6 +37,7 @@ GitHub Actions runs the test suite when files in this project change.
 - **Herbivores** choose vegetation using distance, local plant suitability and biome affinity, then consume energy, reproduce, and die.
 - **Predators** favour suitable habitats and local concentrations of herbivores when selecting prey, then reproduce when sufficiently fed.
 - **Genetics** gives each animal speed, metabolism and feeding-efficiency traits. Asexual offspring inherit these traits with independent small mutations; generation and parent IDs are tracked, population-average traits and their ranges are visible live, and experiment batches calculate initial-to-final trait changes for both species and export the results to CSV.
+- **Life history** distinguishes juveniles from adults. Herbivores mature at 30 days and predators at 45 days by default; the experiment laboratory can override both ages.
 - Pause, resume, advance one day, reset, and adjust simulation speed.
 - A deterministic seeded random generator makes runs reproducible; enter a seed in the interface to replay a world.
 - The simulation runs on a fixed time step, independent of display refresh rate.
@@ -105,6 +106,12 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Track generation and parent lineage, including save migration.
 - [x] Expose live trait averages and ranges for both populations.
 - [x] Measure initial-to-final trait shifts across experiment batches and export selection indicators to CSV.
+
+### 0.11 — Life-history dynamics
+- [x] Add species-specific juvenile maturation before reproduction.
+- [x] Expose maturity ages as experiment parameters.
+- [x] Show juvenile/adult stage in the organism inspector.
+- [x] Validate maturity settings and preserve older saves with default values.
 
 ### 0.9 — Habitat-aware ecology
 - [x] Give herbivores biome affinities when selecting vegetation.
