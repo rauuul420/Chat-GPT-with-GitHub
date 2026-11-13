@@ -392,3 +392,55 @@ test("seasonal soil moisture is reproducible across identical worlds and saves",
   stepWorld(restored);
   assert.deepEqual(restored, first);
 });
+
+
+test("the water cycle keeps surface water and soil moisture bounded", () => {
+  const world = createWorld(20261114, {
+    initialPlants: 0, initialHerbivores: 0, initialPredators: 0, plantGrowthPerDay: 0
+  });
+  for (let day = 0; day < 720; day++) {
+    stepWorld(world);
+    assert.ok(world.terrain.cells.every(cell =>
+      cell.surfaceWater >= 0 && cell.surfaceWater <= 1 &&
+      cell.moisture >= 0.08 && cell.moisture <= 0.98
+    ));
+  }
+});
+
+test("hydrology is deterministic and survives save/restore without diverging", () => {
+  const first = createWorld(20261115);
+  const second = createWorld(20261115);
+  for (let day = 0; day < 240; day++) {
+    stepWorld(first);
+    stepWorld(second);
+  }
+  assert.deepEqual(first.terrain, second.terrain);
+  const restored = restoreWorld(serializeWorld(first));
+  assert.deepEqual(restored, first);
+  stepWorld(first);
+  stepWorld(restored);
+  assert.deepEqual(restored, first);
+});
+
+test("legacy 0.6 terrain saves receive deterministic hydrology defaults", () => {
+  const world = createWorld(20261116);
+  const payload = JSON.parse(serializeWorld(world));
+  for (const cell of payload.world.terrain.cells) {
+    delete cell.surfaceWater;
+    delete cell.elevation;
+  }
+  const restored = restoreWorld(payload);
+  assert.ok(restored.terrain.cells.every(cell =>
+    cell.surfaceWater === 0.02 && Number.isFinite(cell.elevation)
+  ));
+  assert.deepEqual(restoreWorld(payload), restored);
+});
+
+test("seasonal environment exposes separate rainfall and evaporation rates", () => {
+  const spring = getEnvironment(1);
+  const summer = getEnvironment(91);
+  assert.ok(spring.precipitation > summer.precipitation);
+  assert.ok(summer.evaporation > spring.evaporation);
+  assert.equal(typeof spring.precipitation, "number");
+  assert.equal(typeof spring.evaporation, "number");
+});
