@@ -451,7 +451,7 @@ function renderExperimentResults(results) {
       return `velocidad ${signed(values.speed)}, metabolismo ${signed(values.metabolism)}, eficiencia ${signed(values.efficiency)}`;
     };
     line.textContent =
-      `${group[0].scenarioLabel} (${parameters}) · ${summary.runs} ejecuciones · Media final: ${summary.averageFinal.herbivores.toFixed(1)} herbívoros, ${summary.averageFinal.predators.toFixed(1)} depredadores y ${summary.averageFinal.plants.toFixed(1)} plantas · Estructura final media: herbívoros ${summary.averageLifeStages.herbivores.juveniles.toFixed(1)} juveniles/${summary.averageLifeStages.herbivores.adults.toFixed(1)} adultos, depredadores ${summary.averageLifeStages.predators.juveniles.toFixed(1)} juveniles/${summary.averageLifeStages.predators.adults.toFixed(1)} adultos · Cambio genético medio: herbívoros (${change("herbivores")}), depredadores (${change("predators")}) · Extinción: herbívoros ${summary.herbivoreExtinctionRate}%, depredadores ${summary.predatorExtinctionRate}%.`;
+      `${group[0].scenarioLabel} (${parameters}) · ${summary.runs} ejecuciones · Media final: ${summary.averageFinal.herbivores.toFixed(1)} herbívoros, ${summary.averageFinal.predators.toFixed(1)} depredadores y ${summary.averageFinal.plants.toFixed(1)} plantas · Variabilidad CV: herbívoros ${(summary.averageVariability.herbivores.coefficientOfVariation * 100).toFixed(1)}%, depredadores ${(summary.averageVariability.predators.coefficientOfVariation * 100).toFixed(1)}%, plantas ${(summary.averageVariability.plants.coefficientOfVariation * 100).toFixed(1)}% · Estructura final media: herbívoros ${summary.averageLifeStages.herbivores.juveniles.toFixed(1)} juveniles/${summary.averageLifeStages.herbivores.adults.toFixed(1)} adultos, depredadores ${summary.averageLifeStages.predators.juveniles.toFixed(1)} juveniles/${summary.averageLifeStages.predators.adults.toFixed(1)} adultos · Cambio genético medio: herbívoros (${change("herbivores")}), depredadores (${change("predators")}) · Extinción: herbívoros ${summary.herbivoreExtinctionRate}%, depredadores ${summary.predatorExtinctionRate}%.`;
     element("experiment-summary").append(line);
   }
 }
@@ -552,7 +552,7 @@ element("export-experiments").addEventListener("click", () => {
     return;
   }
 
-  const headers = ["scenario","seed","days","final_plants","final_herbivores","final_predators","herbivore_extinction_day","predator_extinction_day","mean_plants","mean_herbivores","mean_predators","peak_plants","peak_herbivores","peak_predators","final_herbivore_juveniles","final_herbivore_adults","final_predator_juveniles","final_predator_adults","herbivore_mean_speed","herbivore_mean_metabolism","herbivore_mean_efficiency","herbivore_mean_generation","predator_mean_speed","predator_mean_metabolism","predator_mean_efficiency","predator_mean_generation","herbivore_delta_speed","herbivore_delta_metabolism","herbivore_delta_efficiency","predator_delta_speed","predator_delta_metabolism","predator_delta_efficiency","event_totals_json","config_json"];
+  const headers = ["scenario","seed","days","final_plants","final_herbivores","final_predators","herbivore_extinction_day","predator_extinction_day","mean_plants","mean_herbivores","mean_predators","peak_plants","peak_herbivores","peak_predators","final_herbivore_juveniles","final_herbivore_adults","final_predator_juveniles","final_predator_adults","plants_std_dev","plants_cv","herbivores_std_dev","herbivores_cv","predators_std_dev","predators_cv","herbivore_mean_speed","herbivore_mean_metabolism","herbivore_mean_efficiency","herbivore_mean_generation","predator_mean_speed","predator_mean_metabolism","predator_mean_efficiency","predator_mean_generation","herbivore_delta_speed","herbivore_delta_metabolism","herbivore_delta_efficiency","predator_delta_speed","predator_delta_metabolism","predator_delta_efficiency","event_totals_json","config_json"];
   const rows = lastExperimentResults.map(result => [
     result.scenario, result.seed, result.days, result.final.plants, result.final.herbivores,
     result.final.predators, result.extinctionDays.herbivores ?? "",
@@ -561,6 +561,9 @@ element("export-experiments").addEventListener("click", () => {
     result.peak.herbivores, result.peak.predators,
     result.final.lifeStages.herbivores.juveniles, result.final.lifeStages.herbivores.adults,
     result.final.lifeStages.predators.juveniles, result.final.lifeStages.predators.adults,
+    result.variability.plants.standardDeviation, result.variability.plants.coefficientOfVariation,
+    result.variability.herbivores.standardDeviation, result.variability.herbivores.coefficientOfVariation,
+    result.variability.predators.standardDeviation, result.variability.predators.coefficientOfVariation,
     result.genetics.herbivores.speed, result.genetics.herbivores.metabolism,
     result.genetics.herbivores.efficiency, result.genetics.herbivores.averageGeneration,
     result.genetics.predators.speed, result.genetics.predators.metabolism,
