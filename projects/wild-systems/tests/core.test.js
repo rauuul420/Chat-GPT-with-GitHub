@@ -799,3 +799,26 @@ test("restore rejects maturity ages outside each species lifespan", () => {
   payload.world.config.herbivoreMaturityAge = payload.world.config.herbivoreMaxAge + 1;
   assert.throws(() => restoreWorld(payload), /parámetros fuera de rango/);
 });
+
+
+test("life-stage statistics partition each species population exactly", () => {
+  const world = createWorld(77115, {
+    initialPlants: 0, initialHerbivores: 3, initialPredators: 2
+  });
+  world.herbivores[0].age = 0;
+  world.herbivores[1].age = world.config.herbivoreMaturityAge;
+  world.herbivores[2].age = world.config.herbivoreMaturityAge - 1;
+  world.predators[0].age = world.config.predatorMaturityAge;
+  world.predators[1].age = 0;
+  const stats = getWorldStats(world);
+  assert.deepEqual(stats.lifeStages.herbivores, { juveniles: 2, adults: 1 });
+  assert.deepEqual(stats.lifeStages.predators, { juveniles: 1, adults: 1 });
+  assert.equal(stats.lifeStages.herbivores.juveniles + stats.lifeStages.herbivores.adults, stats.herbivores);
+  assert.equal(stats.lifeStages.predators.juveniles + stats.lifeStages.predators.adults, stats.predators);
+});
+
+test("experiment summaries average final juvenile and adult populations", () => {
+  const result = runExperiment(77116, 12);
+  const summary = summarizeExperiments([result, result]);
+  assert.deepEqual(summary.averageLifeStages, result.final.lifeStages);
+});
