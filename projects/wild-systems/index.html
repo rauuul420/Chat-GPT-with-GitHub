@@ -15,29 +15,42 @@ h1{font-size:clamp(28px,5vw,44px);letter-spacing:-.04em;margin:5px 0}
 p{color:#aebbad;line-height:1.55;margin:6px 0}
 .tag{border:1px solid #435743;border-radius:999px;padding:7px 11px;color:#b9d3b3;font-size:12px;white-space:nowrap}
 .panel{background:#172019;border:1px solid #334437;border-radius:14px;padding:12px;box-shadow:0 18px 60px #0005}
-canvas{display:block;width:100%;aspect-ratio:16/9;background:#17261b;border-radius:8px}
+canvas{display:block;width:100%;background:#17261b;border-radius:8px}
+#world{aspect-ratio:16/9}#history{height:150px;margin-top:10px}
 .toolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:12px}
-button{background:#26382a;color:#e7eee4;border:1px solid #526b52;border-radius:8px;padding:9px 13px;cursor:pointer;font:inherit;font-size:13px}
-button:hover{background:#354b38}button:focus-visible{outline:2px solid #a5c69a;outline-offset:2px}
+button,input{font:inherit;font-size:13px}
+button{background:#26382a;color:#e7eee4;border:1px solid #526b52;border-radius:8px;padding:9px 13px;cursor:pointer}
+button:hover{background:#354b38}button:focus-visible,input:focus-visible{outline:2px solid #a5c69a;outline-offset:2px}
 button.primary{background:#a5c69a;color:#152016;border-color:#a5c69a;font-weight:700}
+input{width:125px;background:#111b14;color:#e7eee4;border:1px solid #526b52;border-radius:8px;padding:9px}
+.seed-control{display:flex;align-items:center;gap:7px;color:#aebbad;font-size:12px}
+#seed-error{color:#e6a08d;font-size:12px;min-height:18px;margin-top:7px}
 .stats{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
 .stat{flex:1;min-width:110px;background:#1b281e;border:1px solid #334437;border-radius:10px;padding:10px 12px}
 .stat span{display:block;color:#91a18e;font-size:11px;text-transform:uppercase;letter-spacing:.1em}
 .stat strong{display:block;font-size:22px;margin-top:3px;font-variant-numeric:tabular-nums}
 .legend{display:flex;gap:16px;flex-wrap:wrap;color:#aebbad;font-size:12px;margin:13px 2px}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.section-label{font-size:11px;color:#91a18e;text-transform:uppercase;letter-spacing:.12em;margin:13px 2px 6px}
 footer{font-size:12px;color:#9aaa98;margin-top:16px}
 @media(max-width:600px){header{align-items:start;flex-direction:column}}
 </style>
 </head>
 <body><main>
-<header><div><div class="eyebrow">An experiment in emergent behaviour</div><h1>Wild Systems</h1><p>A tiny world that runs by its own rules. No scripted story. Just life, pressure and consequences.</p></div><div class="tag">PROTOTYPE 0.2 · SEEDED SIMULATION</div></header>
-<section class="panel"><canvas id="world" width="960" height="540" aria-label="Simulación de un ecosistema"></canvas>
-<div class="toolbar"><button id="toggle" class="primary">Pausar</button><button id="step">Avanzar un día</button><button id="reset">Nuevo mundo</button><button id="slower">− Velocidad</button><button id="faster">+ Velocidad</button><span id="speed" style="color:#9fb09d;font-size:12px">1× velocidad</span></div>
+<header><div><div class="eyebrow">An experiment in emergent behaviour</div><h1>Wild Systems</h1><p>A tiny world that runs by its own rules. No scripted story. Just life, pressure and consequences.</p></div><div class="tag">PROTOTYPE 0.3 · OBSERVATION TOOLS</div></header>
+<section class="panel">
+<canvas id="world" width="960" height="540" aria-label="Simulación de un ecosistema"></canvas>
+<div class="toolbar">
+<button id="toggle" class="primary">Pausar</button><button id="step">Avanzar un día</button><button id="reset">Nuevo mundo</button>
+<label class="seed-control" for="seed">Semilla <input id="seed" type="number" min="0" max="4294967295" step="1"></label><button id="apply-seed">Repetir semilla</button>
+<button id="slower">− Velocidad</button><button id="faster">+ Velocidad</button><span id="speed" style="color:#9fb09d;font-size:12px">1× velocidad</span>
+</div><div id="seed-error" role="status" aria-live="polite"></div>
 <div class="stats" aria-live="polite"><div class="stat"><span>Herbívoros</span><strong id="herb">—</strong></div><div class="stat"><span>Depredadores</span><strong id="pred">—</strong></div><div class="stat"><span>Vegetación</span><strong id="plants">—</strong></div><div class="stat"><span>Día</span><strong id="day">0</strong></div></div>
+<div class="section-label">Evolución de las poblaciones · últimos 300 días</div>
+<canvas id="history" width="960" height="150" aria-label="Gráfico histórico de vegetación, herbívoros y depredadores"></canvas>
 <div class="legend"><span><i class="dot" style="background:#9acb79"></i>Vegetación</span><span><i class="dot" style="background:#e6c879"></i>Herbívoros</span><span><i class="dot" style="background:#d77e69"></i>Depredadores</span></div>
 </section>
-<footer>Experimento autónomo: los animales buscan alimento, consumen energía, se reproducen y mueren. La vegetación vuelve a crecer. Pausa el mundo para avanzar un día cada vez.</footer>
+<footer>Experimento autónomo: los animales buscan alimento, consumen energía, se reproducen y mueren. Usa una semilla para repetir exactamente un mundo y comparar sus resultados.</footer>
 </main>
 <script type="module" src="./app.js"></script>
 </body></html>
