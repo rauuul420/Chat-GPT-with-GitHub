@@ -149,6 +149,49 @@ function createPlant(world, config, selectedCell = null) {
   };
 }
 
+const HERBIVORE_BIOME_AFFINITY = Object.freeze({
+  grassland: 1, forest: 0.92, wetland: 0.68, barren: 0.42, arid: 0.3, aquatic: 0.08
+});
+const PREDATOR_BIOME_AFFINITY = Object.freeze({
+  forest: 1, grassland: 0.94, wetland: 0.78, barren: 0.62, arid: 0.5, aquatic: 0.18
+});
+
+function terrainCellAt(world, x, y) {
+  const columns = world.terrain.columns;
+  const column = Math.max(0, Math.min(columns - 1, Math.floor(x / world.config.width * columns)));
+  const row = Math.max(0, Math.min(world.terrain.rows - 1, Math.floor(y / world.config.height * world.terrain.rows)));
+  return world.terrain.cells[row * columns + column];
+}
+
+function selectHerbivoreFood(world, herbivore) {
+  let candidate = null;
+  let bestScore = Infinity;
+  for (const plant of world.plants) {
+    const cell = world.terrain.cells[plant.terrainCellId] ?? terrainCellAt(world, plant.x, plant.y);
+    const affinity = HERBIVORE_BIOME_AFFINITY[cell.biome] ?? 0.4;
+    const habitatQuality = 0.35 + cell.growthWeight * 1.2 + affinity * 0.55;
+    const score = distance(plant, herbivore) / habitatQuality;
+    if (score < bestScore) { candidate = plant; bestScore = score; }
+  }
+  return candidate;
+}
+
+function selectPredatorPrey(world, predator) {
+  let candidate = null;
+  let bestScore = Infinity;
+  for (const prey of world.herbivores) {
+    const cell = terrainCellAt(world, prey.x, prey.y);
+    const affinity = PREDATOR_BIOME_AFFINITY[cell.biome] ?? 0.5;
+    let localPrey = 0;
+    for (const other of world.herbivores) if (distance(prey, other) <= 105) localPrey++;
+    const concentrationBonus = 1 + Math.max(0, localPrey - 1) * 0.12;
+    const habitatQuality = 0.65 + affinity * 0.45;
+    const score = distance(prey, predator) / (habitatQuality * concentrationBonus);
+    if (score < bestScore) { candidate = prey; bestScore = score; }
+  }
+  return candidate;
+}
+
 function moveAnimal(world, animal, target, pace, config) {
   if (target) {
     const desired = Math.atan2(target.y - animal.y, target.x - animal.x);
@@ -286,7 +329,7 @@ export function stepWorld(world) {
 
   // Iterate over the population that existed at the beginning of this phase.
   for (const herbivore of world.herbivores) {
-    const food = nearest(world.plants, herbivore);
+    const food = selectHerbivoreFood(world, herbivore);
     moveAnimal(world, herbivore, food, config.herbivoreSpeed, config);
     herbivore.energy -= config.herbivoreDailyCost * environment.herbivoreCostMultiplier;
     herbivore.age += 1;
@@ -326,7 +369,7 @@ export function stepWorld(world) {
   const survivingPredators = [];
 
   for (const predator of world.predators) {
-    const prey = nearest(world.herbivores, predator);
+    const prey = selectPredatorPrey(world, predator);
     moveAnimal(world, predator, prey, config.predatorSpeed, config);
     predator.energy -= config.predatorDailyCost * environment.predatorCostMultiplier;
     predator.age += 1;
@@ -366,12 +409,21 @@ export function stepWorld(world) {
 }
 
 export function getWorldStats(world) {
+  const habitats = Object.fromEntries(
+    ["aquatic", "wetland", "forest", "grassland", "arid", "barren"].map(biome => [
+      biome, { plants: 0, herbivores: 0, predators: 0 }
+    ])
+  );
+  for (const plant of world.plants) {
+    const cell = world.terrain.cells[plant.terrainCellId] ?? terrainCellAt(world, plant.x, plant.y);
+    habitats[cell.biome].plants++;
+  }
+  for (const animal of world.herbivores) habitats[terrainCellAt(world, animal.x, animal.y).biome].herbivores++;
+  for (const animal of world.predators) habitats[terrainCellAt(world, animal.x, animal.y).biome].predators++;
   return {
-    day: world.day,
-    plants: world.plants.length,
-    herbivores: world.herbivores.length,
-    predators: world.predators.length,
-    totalOrganisms: world.herbivores.length + world.predators.length
+    day: world.day, plants: world.plants.length, herbivores: world.herbivores.length,
+    predators: world.predators.length, totalOrganisms: world.herbivores.length + world.predators.length,
+    habitats
   };
 }
 
