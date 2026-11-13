@@ -129,7 +129,7 @@ test("event history stays bounded when a new event is recorded", () => {
 
 test("saving and restoring preserves the complete simulation state", () => {
   const original = createWorld(424242);
-  for (let day = 0; day < 75; day++) stepWorld(original);
+  for (let day = 0; day < 275; day++) stepWorld(original);
 
   const serialized = serializeWorld(original);
   const restored = restoreWorld(serialized);
