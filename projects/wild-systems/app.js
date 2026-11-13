@@ -354,13 +354,14 @@ drawWorld();
 drawHistory();
 requestAnimationFrame(animate);
 
-function renderExperimentResults(results, summary) {
+function renderExperimentResults(results) {
   const body = element("experiment-results");
   body.replaceChildren();
 
   for (const result of results) {
     const row = document.createElement("tr");
     for (const value of [
+      result.scenarioLabel,
       result.seed,
       result.final.herbivores,
       result.final.predators,
@@ -375,9 +376,20 @@ function renderExperimentResults(results, summary) {
     body.append(row);
   }
 
-  element("experiment-summary").textContent =
-    `${results[0].scenarioLabel} · Media final: ${summary.averageFinal.herbivores.toFixed(1)} herbívoros, ${summary.averageFinal.predators.toFixed(1)} depredadores y ${summary.averageFinal.plants.toFixed(1)} plantas. ` +
-    `Extinción de herbívoros: ${summary.herbivoreExtinctionRate}% · depredadores: ${summary.predatorExtinctionRate}%.`;
+  const groups = new Map();
+  for (const result of results) {
+    if (!groups.has(result.scenario)) groups.set(result.scenario, []);
+    groups.get(result.scenario).push(result);
+  }
+
+  element("experiment-summary").replaceChildren();
+  for (const group of groups.values()) {
+    const summary = summarizeExperiments(group);
+    const line = document.createElement("p");
+    line.textContent =
+      `${group[0].scenarioLabel} · ${summary.runs} ejecuciones · Media final: ${summary.averageFinal.herbivores.toFixed(1)} herbívoros, ${summary.averageFinal.predators.toFixed(1)} depredadores y ${summary.averageFinal.plants.toFixed(1)} plantas · Extinción: herbívoros ${summary.herbivoreExtinctionRate}%, depredadores ${summary.predatorExtinctionRate}%.`;
+    element("experiment-summary").append(line);
+  }
 }
 
 element("experiment-scenario-description").textContent = getExperimentScenario(element("experiment-scenario").value).description;
@@ -430,10 +442,7 @@ element("run-experiment").addEventListener("click", async () => {
   button.disabled = true;
   element("experiment-scenario").disabled = true;
   for (const id of ["experiment-plant-growth","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed"]) element(id).disabled = true;
-  lastExperimentResults = [];
-  element("experiment-results").replaceChildren();
-  element("experiment-summary").textContent = "";
-  element("experiment-status").textContent = "Preparando experimentos…";
+  element("experiment-status").textContent = "Añadiendo resultados al laboratorio…";
 
   try {
     for (let index = 0; index < runs; index++) {
@@ -448,15 +457,23 @@ element("run-experiment").addEventListener("click", async () => {
     }
 
     const summary = summarizeExperiments(lastExperimentResults);
-    renderExperimentResults(lastExperimentResults, summary);
-    element("experiment-status").textContent = `Completado: ${runs} mundos × ${days} días.`;
+    renderExperimentResults(lastExperimentResults);
+    element("experiment-status").textContent = `Añadidos ${runs} mundos × ${days} días. Total acumulado: ${lastExperimentResults.length} ejecuciones.`;
   } catch (error) {
+    renderExperimentResults(lastExperimentResults);
     element("experiment-status").textContent = error.message || "No se pudieron completar los experimentos.";
   } finally {
     button.disabled = false;
     element("experiment-scenario").disabled = false;
     for (const id of ["experiment-plant-growth","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed"]) element(id).disabled = false;
   }
+});
+
+element("clear-experiments").addEventListener("click", () => {
+  lastExperimentResults = [];
+  element("experiment-results").replaceChildren();
+  element("experiment-summary").replaceChildren();
+  element("experiment-status").textContent = "Resultados eliminados.";
 });
 
 element("export-experiments").addEventListener("click", () => {
