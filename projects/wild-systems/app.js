@@ -436,11 +436,17 @@ element("run-experiment").addEventListener("click", async () => {
     return;
   }
 
+  if (lastExperimentResults.length + runs > 500) {
+    element("experiment-status").textContent = "El laboratorio conserva hasta 500 ejecuciones. Exporta y limpia resultados antes de continuar.";
+    return;
+  }
+
   const scenario = getExperimentScenario(element("experiment-scenario").value);
   const experimentConfig = { ...scenario.config, ...customConfig };
   const button = element("run-experiment");
   button.disabled = true;
   element("experiment-scenario").disabled = true;
+  element("clear-experiments").disabled = true;
   for (const id of ["experiment-plant-growth","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed"]) element(id).disabled = true;
   element("experiment-status").textContent = "Añadiendo resultados al laboratorio…";
 
@@ -456,7 +462,6 @@ element("run-experiment").addEventListener("click", async () => {
       await new Promise(resolve => requestAnimationFrame(() => resolve()));
     }
 
-    const summary = summarizeExperiments(lastExperimentResults);
     renderExperimentResults(lastExperimentResults);
     element("experiment-status").textContent = `Añadidos ${runs} mundos × ${days} días. Total acumulado: ${lastExperimentResults.length} ejecuciones.`;
   } catch (error) {
@@ -464,6 +469,7 @@ element("run-experiment").addEventListener("click", async () => {
     element("experiment-status").textContent = error.message || "No se pudieron completar los experimentos.";
   } finally {
     button.disabled = false;
+    element("clear-experiments").disabled = false;
     element("experiment-scenario").disabled = false;
     for (const id of ["experiment-plant-growth","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed"]) element(id).disabled = false;
   }
