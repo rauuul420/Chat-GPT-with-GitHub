@@ -30,7 +30,7 @@ GitHub Actions runs the test suite when files in this project change.
 ## Current prototype
 
 - **Vegetation** regrows within a population cap, with seasonal growth rates and a bias towards fertile, moist terrain cells.
-- **Terrain** is a deterministic 12 × 7 grid. Each cell has seeded fertility, elevation, soil moisture and surface water; these shape vegetation and local water availability.
+- **Terrain and biomes** form a deterministic 12 × 7 grid. Fertility, elevation, soil moisture and surface water drive six changing habitat classes: aquatic, wetland, forest, grassland, arid and barren. Each biome modifies local vegetation suitability.
 - **Seasons and climate** follow a deterministic four-season calendar. Seasonal rainfall and evaporation feed a local water cycle: rain accumulates on the surface, infiltrates soil, evaporates or runs towards lower neighbouring cells. Soil moisture and surface water remain separate state variables.
 - **Herbivores** seek vegetation, consume energy, reproduce, and die.
 - **Predators** hunt herbivores and reproduce when sufficiently fed.
@@ -65,7 +65,7 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 ## Model and current limitations
 
 - The world is a continuous 2D plane with reflecting borders, overlaid by a 12 × 7 ecological grid.
-- The hydrology model is intentionally simplified: it represents surface runoff between neighbouring cells, infiltration and evaporation, but not groundwater, river networks, erosion or calibrated water volumes. Plant growth is still a population-level regrowth budget distributed by local habitat suitability.
+- Biomes are emergent classifications, recalculated from local conditions each simulation day; they are not hand-painted map regions. Habitat suitability influences where new vegetation establishes.\n- The hydrology model is intentionally simplified: it represents surface runoff between neighbouring cells, infiltration and evaporation, but not groundwater, river networks, erosion or calibrated water volumes. Plant growth is still a population-level regrowth budget distributed by local habitat suitability.
 - A new world starts in spring. The seasonal year has four configurable seasons of 90 days each by default. Spring, summer, autumn and winter modify vegetation growth and daily energy costs; temperature is a deterministic indicator, not yet a physiological survival threshold.
 - Organisms use nearest-target steering; there is no memory, territory, genetics, or social behaviour yet.
 - The model is an exploratory toy model, not a scientifically calibrated ecological model.
@@ -94,6 +94,13 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Reproducible multi-seed experiment batches with population and extinction summaries.
 - [x] Export experiment results as CSV.
 - [ ] Copyable experiment settings.
+
+### 0.8 — Emergent biomes
+- [x] Classify aquatic, wetland, forest, grassland, arid and barren habitats from local environmental conditions.
+- [x] Recalculate biome identity as water and soil moisture evolve.
+- [x] Make habitat type influence vegetation suitability.
+- [x] Visualize biome regions and distinguish surface water.
+- [x] Preserve derived biome state through deterministic save migration.
 
 ### 0.7 — Local hydrology
 - [x] Separate surface water from soil moisture.
