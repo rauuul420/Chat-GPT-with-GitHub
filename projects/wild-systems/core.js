@@ -62,6 +62,25 @@ function hashTerrain(seed, x, y, salt) {
   return (value >>> 0) / 4294967296;
 }
 
+
+export function classifyBiome(cell) {
+  if (cell.surfaceWater >= 0.35) return "aquatic";
+  if (cell.surfaceWater >= 0.12 || cell.moisture >= 0.84) return "wetland";
+  if (cell.moisture <= 0.28) return "arid";
+  if (cell.fertility >= 0.68 && cell.moisture >= 0.48) return "forest";
+  if (cell.fertility >= 0.34) return "grassland";
+  return "barren";
+}
+
+function getHabitatSuitability(cell) {
+  const moistureSuitability = Math.max(0.05, 1 - Math.abs(cell.moisture - 0.62) / 0.62);
+  const biomeFactor = {
+    aquatic: 0.12, wetland: 0.72, forest: 1.08,
+    grassland: 1, arid: 0.48, barren: 0.32
+  }[cell.biome];
+  return cell.fertility * moistureSuitability * biomeFactor;
+}
+
 export function createTerrain(seed, config = DEFAULT_CONFIG) {
   const columns = config.terrainColumns ?? DEFAULT_CONFIG.terrainColumns;
   const rows = config.terrainRows ?? DEFAULT_CONFIG.terrainRows;
@@ -84,8 +103,12 @@ export function createTerrain(seed, config = DEFAULT_CONFIG) {
         moisture: Number(moisture.toFixed(4)),
         surfaceWater: 0.02,
         elevation: Number(hashTerrain(seed, x, y, 0xAD90777D).toFixed(4)),
-        growthWeight: Number((fertility * Math.max(0.05, 1 - Math.abs(moisture - 0.62) / 0.62)).toFixed(4))
+        biome: "grassland",
+        growthWeight: 0
       });
+      const cell = cells[cells.length - 1];
+      cell.biome = classifyBiome(cell);
+      cell.growthWeight = Number(getHabitatSuitability(cell).toFixed(4));
     }
   }
   return { columns, rows, cells };
@@ -227,8 +250,8 @@ function updateHydrology(world, environment) {
       cell.moisture + moistureDelta[cell.id]
     )).toFixed(4));
     // Plants prefer moist soil, but permanently saturated ground is not ideal.
-    const moistureSuitability = Math.max(0.05, 1 - Math.abs(cell.moisture - 0.62) / 0.62);
-    cell.growthWeight = Number((cell.fertility * moistureSuitability).toFixed(4));
+    cell.biome = classifyBiome(cell);
+    cell.growthWeight = Number(getHabitatSuitability(cell).toFixed(4));
   }
 }
 
@@ -401,6 +424,8 @@ export function restoreWorld(serialized) {
       if (cell && Number.isInteger(cell.x) && Number.isInteger(cell.y)) {
         cell.surfaceWater ??= 0.02;
         cell.elevation ??= Number(hashTerrain(world.seed, cell.x, cell.y, 0xAD90777D).toFixed(4));
+        cell.biome = classifyBiome(cell);
+        cell.growthWeight = Number(getHabitatSuitability(cell).toFixed(4));
       }
     }
   }
