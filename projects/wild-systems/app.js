@@ -47,7 +47,12 @@ function renderInspector() {
   }
 
   const species = organism.species === "herbivore" ? "Herbívoro" : "Depredador";
-  panel.textContent = `${species} #${organism.id} · Edad: ${organism.age} días · Energía: ${organism.energy.toFixed(1)} · Posición: ${organism.x.toFixed(1)}, ${organism.y.toFixed(1)}`;
+  const traits = organism.traits ?? { speed: 1, metabolism: 1, efficiency: 1 };
+  const generation = organism.generation ?? 0;
+  const lineage = organism.parentId === null || organism.parentId === undefined
+    ? "fundador"
+    : "descendiente de #" + organism.parentId;
+  panel.textContent = `${species} #${organism.id} · Edad: ${organism.age} días · Energía: ${organism.energy.toFixed(1)} · Generación: ${generation} · ${lineage} · Velocidad: ${traits.speed.toFixed(2)}× · Metabolismo: ${traits.metabolism.toFixed(2)}× · Eficiencia: ${traits.efficiency.toFixed(2)}×`;
 }
 
 function renderEvents() {
