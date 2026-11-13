@@ -236,7 +236,7 @@ element("save-world").addEventListener("click", () => {
   document.body.append(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 
 element("load-world").addEventListener("click", () => element("world-file").click());
