@@ -18,11 +18,11 @@ p{color:#aebbad;line-height:1.55;margin:6px 0}
 canvas{display:block;width:100%;background:#17261b;border-radius:8px}
 #world{aspect-ratio:16/9}#history{height:150px;margin-top:10px}
 .toolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:12px}
-button,input{font:inherit;font-size:13px}
+button,input,select{font:inherit;font-size:13px}
 button{background:#26382a;color:#e7eee4;border:1px solid #526b52;border-radius:8px;padding:9px 13px;cursor:pointer}
 button:hover{background:#354b38}button:focus-visible,input:focus-visible{outline:2px solid #a5c69a;outline-offset:2px}
 button.primary{background:#a5c69a;color:#152016;border-color:#a5c69a;font-weight:700}
-input{width:125px;background:#111b14;color:#e7eee4;border:1px solid #526b52;border-radius:8px;padding:9px}
+input,select{width:145px;background:#111b14;color:#e7eee4;border:1px solid #526b52;border-radius:8px;padding:9px}
 .seed-control{display:flex;align-items:center;gap:7px;color:#aebbad;font-size:12px}.file-input{display:none}
 #seed-error{color:#e6a08d;font-size:12px;min-height:18px;margin-top:7px}
 .stats{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
@@ -56,6 +56,7 @@ footer{font-size:12px;color:#9aaa98;margin-top:16px}
   <div class="section-label">Laboratorio de experimentos</div>
   <p>Ejecuta varios mundos independientes con semillas reproducibles y compara sus resultados. Estos experimentos no modifican el mundo que tienes abierto.</p>
   <div class="experiment-controls">
+    <label>Escenario<select id="experiment-scenario"><option value="balanced">Ecosistema equilibrado</option><option value="herbivore_bloom">Explosión de herbívoros</option><option value="predator_pressure">Presión de depredadores</option><option value="scarce_resources">Escasez de recursos</option><option value="predator_free">Sin depredadores</option></select></label>
     <label>Ejecuciones (1–20)<input id="experiment-runs" type="number" min="1" max="20" value="5"></label>
     <label>Días por mundo (1–3000)<input id="experiment-days" type="number" min="1" max="3000" value="500"></label>
     <label>Semilla base<input id="experiment-seed" type="number" min="0" max="4294967295" value="20261113"></label>
