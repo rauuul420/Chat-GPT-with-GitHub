@@ -335,8 +335,10 @@ element("run-experiment").addEventListener("click", async () => {
     return;
   }
 
+  const scenario = getExperimentScenario(element("experiment-scenario").value);
   const button = element("run-experiment");
   button.disabled = true;
+  element("experiment-scenario").disabled = true;
   lastExperimentResults = [];
   element("experiment-results").replaceChildren();
   element("experiment-summary").textContent = "";
@@ -345,7 +347,6 @@ element("run-experiment").addEventListener("click", async () => {
   try {
     for (let index = 0; index < runs; index++) {
       const seed = (baseSeed + Math.imul(index, 0x9E3779B9)) >>> 0;
-      const scenario = getExperimentScenario(element("experiment-scenario").value);
       const result = runExperiment(seed, days, scenario.config);
       result.scenario = scenario.id;
       result.scenarioLabel = scenario.label;
@@ -361,6 +362,7 @@ element("run-experiment").addEventListener("click", async () => {
     element("experiment-status").textContent = error.message || "No se pudieron completar los experimentos.";
   } finally {
     button.disabled = false;
+    element("experiment-scenario").disabled = false;
   }
 });
 
@@ -370,13 +372,13 @@ element("export-experiments").addEventListener("click", () => {
     return;
   }
 
-  const headers = ["scenario","seed","days","final_plants","final_herbivores","final_predators","herbivore_extinction_day","predator_extinction_day","mean_plants","mean_herbivores","mean_predators","peak_plants","peak_herbivores","peak_predators"];
+  const headers = ["scenario","seed","days","final_plants","final_herbivores","final_predators","herbivore_extinction_day","predator_extinction_day","mean_plants","mean_herbivores","mean_predators","peak_plants","peak_herbivores","peak_predators","event_totals_json"];
   const rows = lastExperimentResults.map(result => [
     result.scenario, result.seed, result.days, result.final.plants, result.final.herbivores,
     result.final.predators, result.extinctionDays.herbivores ?? "",
     result.extinctionDays.predators ?? "", result.mean.plants,
     result.mean.herbivores, result.mean.predators, result.peak.plants,
-    result.peak.herbivores, result.peak.predators
+    result.peak.herbivores, result.peak.predators, JSON.stringify(result.eventTotals)
   ]);
   const csv = [headers, ...rows].map(row =>
     row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")
