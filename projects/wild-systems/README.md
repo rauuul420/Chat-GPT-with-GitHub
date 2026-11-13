@@ -29,7 +29,7 @@ GitHub Actions runs the test suite when files in this project change.
 
 ## Current prototype
 
-**Version 0.12.0 — shareable experiment settings.** Animal target selection accounts for biome affinity and local resource or prey concentration. Individuals carry heritable speed, metabolism and feeding-efficiency traits; offspring inherit their parent's traits with small random mutations. Juveniles must reach species-specific maturity before reproducing.
+**Version 0.13.0 — population variability analysis.** Animal target selection accounts for biome affinity and local resource or prey concentration. Individuals carry heritable speed, metabolism and feeding-efficiency traits; offspring inherit their parent's traits with small random mutations. Juveniles must reach species-specific maturity before reproducing.
 
 - **Vegetation** regrows within a population cap, with seasonal growth rates and a bias towards fertile, moist terrain cells.
 - **Terrain and biomes** form a deterministic 12 × 7 grid. Fertility, elevation, soil moisture and surface water drive six changing habitat classes: aquatic, wetland, forest, grassland, arid and barren. Each biome modifies local vegetation suitability.
@@ -66,7 +66,7 @@ projects/wild-systems/
 
 ## Experiment laboratory
 
-The browser laboratory can run 1–20 independent worlds for up to 3,000 days per world. Choose one of five scenarios, optionally override vegetation growth, season length, daily energy costs, predator speed, and species maturity ages, then run independent seeds derived deterministically from the base seed. Results include final, mean, and peak populations, first extinction day for herbivores and predators, event totals, final genetic averages, and initial-to-final trait changes. Results from different scenario runs accumulate in a comparison table with per-scenario summaries until cleared. Reusing the same base seed across scenarios helps compare different ecological conditions with a consistent seed set. The laboratory keeps up to 500 result rows in memory. Export the full table as CSV for analysis. Export and import validated JSON experiment settings to share reproducible configurations without replacing accumulated results. Batch execution yields between runs so the page can repaint and report progress.
+The browser laboratory can run 1–20 independent worlds for up to 3,000 days per world. Choose one of five scenarios, optionally override vegetation growth, season length, daily energy costs, predator speed, and species maturity ages, then run independent seeds derived deterministically from the base seed. Results include final, mean, and peak populations, population standard deviation and coefficient of variation, first extinction day for herbivores and predators, event totals, final genetic averages, and initial-to-final trait changes. Results from different scenario runs accumulate in a comparison table with per-scenario summaries until cleared. Reusing the same base seed across scenarios helps compare different ecological conditions with a consistent seed set. The laboratory keeps up to 500 result rows in memory. Export the full table as CSV for analysis. Export and import validated JSON experiment settings to share reproducible configurations without replacing accumulated results. Batch execution yields between runs so the page can repaint and report progress.
 
 ## Genetic model
 
@@ -118,6 +118,11 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Track generation and parent lineage, including save migration.
 - [x] Expose live trait averages and ranges for both populations.
 - [x] Measure initial-to-final trait shifts across experiment batches and export selection indicators to CSV.
+
+### 0.13 — Population variability analysis
+- [x] Calculate daily population standard deviation and coefficient of variation.
+- [x] Compare average variability across independent experiment batches.
+- [x] Include variability metrics in CSV exports and summaries.
 
 ### 0.12 — Reproducible experiment configurations
 - [x] Export experiment settings as versioned JSON.
