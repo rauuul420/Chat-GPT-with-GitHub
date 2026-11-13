@@ -6,13 +6,25 @@ The project deliberately starts outside the desktop-app space. It runs in a mode
 
 ## Run it
 
-Open `index.html` in a modern browser. No build step or dependency installation is required.
+Because the app uses native JavaScript modules, serve the folder over HTTP rather than opening the HTML file directly.
+
+From this directory, run:
+
+```bash
+python -m http.server 8000
+```
+
+Then open [http://localhost:8000](http://localhost:8000).
+
+No build step or third-party dependency installation is required.
 
 For automated tests, use Node.js 20 or newer:
 
 ```bash
 npm test
 ```
+
+GitHub Actions runs the test suite when files in this project change.
 
 ## Current prototype
 
@@ -52,6 +64,7 @@ projects/wild-systems/
 - [x] Add deterministic seeded randomness.
 - [x] Use a fixed-step simulation clock.
 - [x] Add automated tests for reproducibility and invariants.
+- [x] Add continuous integration for the simulation tests.
 - [ ] Add an explicit event model for births, deaths, feeding, and predation.
 - [ ] Add state serialization and restore tests.
 
