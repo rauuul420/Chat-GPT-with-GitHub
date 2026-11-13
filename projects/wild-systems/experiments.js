@@ -71,6 +71,7 @@ export function runExperiment(seed, days, config = {}) {
   const world = createWorld(seed, config);
   const initialGenetics = getWorldStats(world).genetics;
   const sums = { plants: 0, herbivores: 0, predators: 0 };
+  const squaredSums = { plants: 0, herbivores: 0, predators: 0 };
   const peak = { ...getWorldStats(world) };
   const extinctionDays = {
     herbivores: world.herbivores.length === 0 ? 0 : null,
@@ -83,6 +84,7 @@ export function runExperiment(seed, days, config = {}) {
 
     for (const species of ["plants", "herbivores", "predators"]) {
       sums[species] += stats[species];
+      squaredSums[species] += stats[species] ** 2;
       peak[species] = Math.max(peak[species], stats[species]);
     }
 
@@ -95,6 +97,15 @@ export function runExperiment(seed, days, config = {}) {
   }
 
   const final = getWorldStats(world);
+  const variability = Object.fromEntries(["plants", "herbivores", "predators"].map(species => {
+    const mean = sums[species] / days;
+    const variance = Math.max(0, squaredSums[species] / days - mean ** 2);
+    const standardDeviation = Math.sqrt(variance);
+    return [species, {
+      standardDeviation: Number(standardDeviation.toFixed(3)),
+      coefficientOfVariation: Number((mean > 0 ? standardDeviation / mean : 0).toFixed(3))
+    }];
+  }));
   const geneticChange = Object.fromEntries(["herbivores", "predators"].map(species => [
     species, Object.fromEntries(["speed", "metabolism", "efficiency"].map(trait => [
       trait, Number((final.genetics[species][trait] - initialGenetics[species][trait]).toFixed(3))
@@ -114,6 +125,7 @@ export function runExperiment(seed, days, config = {}) {
       herbivores: sums.herbivores / days,
       predators: sums.predators / days
     },
+    variability,
     peak: {
       plants: peak.plants,
       herbivores: peak.herbivores,
@@ -133,6 +145,9 @@ export function summarizeExperiments(results) {
   }
 
   const averageFinal = { plants: 0, herbivores: 0, predators: 0 };
+  const averageVariability = Object.fromEntries(["plants", "herbivores", "predators"].map(species => [
+    species, { standardDeviation: 0, coefficientOfVariation: 0 }
+  ]));
   const averageLifeStages = {
     herbivores: { juveniles: 0, adults: 0 },
     predators: { juveniles: 0, adults: 0 }
@@ -146,6 +161,9 @@ export function summarizeExperiments(results) {
   for (const result of results) {
     for (const species of Object.keys(averageFinal)) {
       averageFinal[species] += result.final[species] / results.length;
+      for (const metric of Object.keys(averageVariability[species])) {
+        averageVariability[species][metric] += (result.variability?.[species]?.[metric] ?? 0) / results.length;
+      }
     }
     for (const species of ["herbivores", "predators"]) {
       for (const stage of ["juveniles", "adults"]) {
@@ -161,6 +179,11 @@ export function summarizeExperiments(results) {
       }
     }
   }
+  for (const species of ["plants", "herbivores", "predators"]) {
+    for (const metric of Object.keys(averageVariability[species])) {
+      averageVariability[species][metric] = Number(averageVariability[species][metric].toFixed(3));
+    }
+  }
   for (const species of ["herbivores", "predators"]) {
     for (const trait of Object.keys(averageGenetics[species])) {
       averageGenetics[species][trait] = Number(averageGenetics[species][trait].toFixed(3));
@@ -173,6 +196,7 @@ export function summarizeExperiments(results) {
   return {
     runs: results.length,
     averageFinal,
+    averageVariability,
     averageLifeStages,
     averageGenetics,
     averageGeneticChange,
