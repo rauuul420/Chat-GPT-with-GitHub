@@ -726,3 +726,30 @@ test("restore rejects out-of-range genetic traits", () => {
   payload.world.herbivores[0].traits.speed = 1.5;
   assert.throws(() => restoreWorld(payload), /genética inválida/);
 });
+
+
+test("genetic population statistics include trait ranges and dispersion", () => {
+  const world = createWorld(77110, {
+    initialPlants: 0, initialHerbivores: 2, initialPredators: 0
+  });
+  world.herbivores[0].traits.speed = 0.8;
+  world.herbivores[1].traits.speed = 1.2;
+  const distribution = getWorldStats(world).genetics.herbivores.distribution.speed;
+  assert.equal(distribution.min, 0.8);
+  assert.equal(distribution.max, 1.2);
+  assert.equal(distribution.standardDeviation, 0.2);
+});
+
+test("experiment batches measure average genetic change from the initial population", () => {
+  const result = runExperiment(77111, 20);
+  for (const species of ["herbivores", "predators"]) {
+    for (const trait of ["speed", "metabolism", "efficiency"]) {
+      assert.equal(
+        result.geneticChange[species][trait],
+        Number((result.genetics[species][trait] - result.initialGenetics[species][trait]).toFixed(3))
+      );
+    }
+  }
+  const summary = summarizeExperiments([result, result]);
+  assert.deepEqual(summary.averageGeneticChange, result.geneticChange);
+});
