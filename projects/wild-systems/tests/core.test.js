@@ -568,7 +568,7 @@ test("predators can favour a nearby prey cluster over a slightly closer isolated
     { id: 4, x: 513, y: 271 },
     { id: 5, x: 514, y: 269 }
   ];
-  const cell = world.terrain.cells[world.terrain.rows * 3 + 6];
+  const cell = world.terrain.cells[3 * world.terrain.columns + 6];
   cell.biome = "grassland";
   world.herbivores = [isolated, ...group];
   assert.equal(selectPredatorPrey(world, predator).id, group[0].id);
