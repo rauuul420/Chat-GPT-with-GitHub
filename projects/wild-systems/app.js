@@ -1,4 +1,4 @@
-import { createWorld, stepWorld, getWorldStats } from "./core.js";
+import { createWorld, stepWorld, getWorldStats, serializeWorld, restoreWorld } from "./core.js";
 
 const canvas = document.querySelector("#world");
 const context = canvas.getContext("2d");
@@ -226,6 +226,45 @@ element("step").addEventListener("click", () => {
 });
 
 element("reset").addEventListener("click", () => resetWorld());
+
+element("save-world").addEventListener("click", () => {
+  const blob = new Blob([serializeWorld(world)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `wild-systems-seed-${world.seed}-day-${world.day}.json`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+});
+
+element("load-world").addEventListener("click", () => element("world-file").click());
+
+element("world-file").addEventListener("change", async event => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  try {
+    world = restoreWorld(await file.text());
+    const stats = getWorldStats(world);
+    history = [{
+      day: stats.day,
+      plants: stats.plants,
+      herbivores: stats.herbivores,
+      predators: stats.predators
+    }];
+    accumulator = 0;
+    element("seed-error").textContent = "";
+    updateStats();
+    drawWorld();
+    drawHistory();
+  } catch (error) {
+    element("seed-error").textContent = error.message || "No se pudo cargar el mundo.";
+  } finally {
+    event.target.value = "";
+  }
+});
 
 element("apply-seed").addEventListener("click", () => {
   const value = Number(element("seed").value);
