@@ -17,6 +17,7 @@ let speed = 1;
 let previousTime = 0;
 let accumulator = 0;
 let history = [];
+let selectedOrganism = null;
 
 function recordHistory() {
   const stats = getWorldStats(world);
@@ -27,6 +28,25 @@ function recordHistory() {
     predators: stats.predators
   });
   if (history.length > HISTORY_LIMIT) history.shift();
+}
+
+function renderInspector() {
+  const panel = element("organism-inspector");
+  if (!selectedOrganism) {
+    panel.textContent = "Haz clic sobre un herbívoro o depredador para inspeccionarlo.";
+    return;
+  }
+
+  const population = selectedOrganism.species === "herbivore" ? world.herbivores : world.predators;
+  const organism = population.find(item => item.id === selectedOrganism.id);
+  if (!organism) {
+    panel.textContent = `El organismo #${selectedOrganism.id} ya no está vivo.`;
+    selectedOrganism = null;
+    return;
+  }
+
+  const species = organism.species === "herbivore" ? "Herbívoro" : "Depredador";
+  panel.textContent = `${species} #${organism.id} · Edad: ${organism.age} días · Energía: ${organism.energy.toFixed(1)} · Posición: ${organism.x.toFixed(1)}, ${organism.y.toFixed(1)}`;
 }
 
 function renderEvents() {
@@ -64,6 +84,7 @@ function updateStats() {
   element("day").textContent = stats.day;
   element("speed").textContent = `${speed}× velocidad`;
   renderEvents();
+  renderInspector();
 }
 
 function drawWorld() {
@@ -99,6 +120,13 @@ function drawWorld() {
     context.beginPath();
     context.arc(animal.x, animal.y, 3.2, 0, Math.PI * 2);
     context.fill();
+    if (selectedOrganism?.species === "herbivore" && selectedOrganism.id === animal.id) {
+      context.strokeStyle = "#ffffff";
+      context.lineWidth = 1.5;
+      context.beginPath();
+      context.arc(animal.x, animal.y, 7, 0, Math.PI * 2);
+      context.stroke();
+    }
   }
 
   for (const animal of world.predators) {
@@ -109,6 +137,13 @@ function drawWorld() {
     context.strokeStyle = "#f0b19e";
     context.lineWidth = 1;
     context.stroke();
+    if (selectedOrganism?.species === "predator" && selectedOrganism.id === animal.id) {
+      context.strokeStyle = "#ffffff";
+      context.lineWidth = 1.5;
+      context.beginPath();
+      context.arc(animal.x, animal.y, 9, 0, Math.PI * 2);
+      context.stroke();
+    }
   }
 }
 
@@ -180,6 +215,7 @@ function resetWorld(seedValue = null) {
     ? Math.floor(Math.random() * 0xFFFFFFFF) >>> 0
     : seedValue >>> 0;
   world = createWorld(seed);
+  selectedOrganism = null;
   element("seed").value = String(seed);
   history = [];
   accumulator = 0;
@@ -211,6 +247,28 @@ function animate(timestamp) {
   drawHistory();
   requestAnimationFrame(animate);
 }
+
+canvas.addEventListener("click", event => {
+  const rect = canvas.getBoundingClientRect();
+  const x = (event.clientX - rect.left) * (width / rect.width);
+  const y = (event.clientY - rect.top) * (height / rect.height);
+  let nearest = null;
+  let nearestDistance = Infinity;
+
+  for (const animal of [...world.herbivores, ...world.predators]) {
+    const currentDistance = Math.hypot(animal.x - x, animal.y - y);
+    if (currentDistance < nearestDistance) {
+      nearest = animal;
+      nearestDistance = currentDistance;
+    }
+  }
+
+  selectedOrganism = nearest && nearestDistance <= 14
+    ? { species: nearest.species, id: nearest.id }
+    : null;
+  updateStats();
+  drawWorld();
+});
 
 element("toggle").addEventListener("click", () => {
   running = !running;
@@ -249,6 +307,7 @@ element("world-file").addEventListener("change", async event => {
 
   try {
     world = restoreWorld(await file.text());
+    selectedOrganism = null;
     element("seed").value = String(world.seed);
     const stats = getWorldStats(world);
     history = [{
