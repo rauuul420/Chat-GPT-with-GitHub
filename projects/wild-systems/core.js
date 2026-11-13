@@ -112,7 +112,19 @@ function chooseTerrainCell(world) {
   return cells[cells.length - 1];
 }
 
-function createAnimal(world, species, config, x, y) {
+function createTraits(world, parent = null) {
+  const traits = {};
+  for (const key of ["speed", "metabolism", "efficiency"]) {
+    const inherited = parent?.traits?.[key] ?? 1;
+    const mutation = parent && random(world) < 0.18
+      ? random(world, -0.08, 0.08)
+      : 0;
+    traits[key] = Number(Math.max(0.65, Math.min(1.35, inherited + mutation)).toFixed(3));
+  }
+  return traits;
+}
+
+function createAnimal(world, species, config, x, y, parent = null) {
   const herbivore = species === "herbivore";
   return {
     id: world.nextId++,
@@ -121,7 +133,10 @@ function createAnimal(world, species, config, x, y) {
     y: y ?? random(world, 10, config.height - 10),
     angle: random(world, 0, Math.PI * 2),
     energy: herbivore ? random(world, 55, 90) : random(world, 65, 100),
-    age: 0
+    age: 0,
+    generation: parent ? (parent.generation ?? 0) + 1 : 0,
+    parentId: parent?.id ?? null,
+    traits: createTraits(world, parent)
   };
 }
 
@@ -328,12 +343,12 @@ export function stepWorld(world) {
   // Iterate over the population that existed at the beginning of this phase.
   for (const herbivore of world.herbivores) {
     const food = selectHerbivoreFood(world, herbivore);
-    moveAnimal(world, herbivore, food, config.herbivoreSpeed, config);
-    herbivore.energy -= config.herbivoreDailyCost * environment.herbivoreCostMultiplier;
+    moveAnimal(world, herbivore, food, config.herbivoreSpeed * (herbivore.traits?.speed ?? 1), config);
+    herbivore.energy -= config.herbivoreDailyCost * (herbivore.traits?.metabolism ?? 1) * environment.herbivoreCostMultiplier;
     herbivore.age += 1;
 
     if (food && distance(herbivore, food) < 9) {
-      herbivore.energy += config.herbivoreFoodGain;
+      herbivore.energy += config.herbivoreFoodGain * (herbivore.traits?.efficiency ?? 1);
       recordEvent(world, "herbivore_feeding", { organismId: herbivore.id });
       const foodIndex = world.plants.findIndex(plant => plant.id === food.id);
       if (foodIndex !== -1) world.plants.splice(foodIndex, 1);
@@ -345,7 +360,8 @@ export function stepWorld(world) {
       const newborn = createAnimal(
         world, "herbivore", config,
         herbivore.x + random(world, -8, 8),
-        herbivore.y + random(world, -8, 8)
+        herbivore.y + random(world, -8, 8),
+        herbivore
       );
       herbivoreBirths.push(newborn);
       recordEvent(world, "herbivore_birth", { organismId: newborn.id, parentId: herbivore.id });
@@ -369,12 +385,12 @@ export function stepWorld(world) {
 
   for (const predator of world.predators) {
     const prey = selectPredatorPrey(world, predator, preyDensity);
-    moveAnimal(world, predator, prey, config.predatorSpeed, config);
-    predator.energy -= config.predatorDailyCost * environment.predatorCostMultiplier;
+    moveAnimal(world, predator, prey, config.predatorSpeed * (predator.traits?.speed ?? 1), config);
+    predator.energy -= config.predatorDailyCost * (predator.traits?.metabolism ?? 1) * environment.predatorCostMultiplier;
     predator.age += 1;
 
-    if (prey && distance(predator, prey) < 11) {
-      predator.energy += config.predatorFoodGain;
+    if (prey && distance(predator, prey) < 11 * (predator.traits?.speed ?? 1)) {
+      predator.energy += config.predatorFoodGain * (predator.traits?.efficiency ?? 1);
       recordEvent(world, "predation", { predatorId: predator.id, preyId: prey.id });
       recordEvent(world, "herbivore_death", { organismId: prey.id, cause: "predation", predatorId: predator.id });
       const preyIndex = world.herbivores.findIndex(item => item.id === prey.id);
@@ -387,7 +403,8 @@ export function stepWorld(world) {
       const newborn = createAnimal(
         world, "predator", config,
         predator.x + random(world, -8, 8),
-        predator.y + random(world, -8, 8)
+        predator.y + random(world, -8, 8),
+        predator
       );
       predatorBirths.push(newborn);
       recordEvent(world, "predator_birth", { organismId: newborn.id, parentId: predator.id });
@@ -408,6 +425,19 @@ export function stepWorld(world) {
 }
 
 export function getWorldStats(world) {
+  const summarizeTraits = population => {
+    if (population.length === 0) return { speed: 0, metabolism: 0, efficiency: 0, averageGeneration: 0 };
+    const totals = population.reduce((sum, animal) => {
+      sum.speed += animal.traits?.speed ?? 1;
+      sum.metabolism += animal.traits?.metabolism ?? 1;
+      sum.efficiency += animal.traits?.efficiency ?? 1;
+      sum.averageGeneration += animal.generation ?? 0;
+      return sum;
+    }, { speed: 0, metabolism: 0, efficiency: 0, averageGeneration: 0 });
+    return Object.fromEntries(Object.entries(totals).map(([key, value]) =>
+      [key, Number((value / population.length).toFixed(3))]
+    ));
+  };
   const habitats = Object.fromEntries(
     ["aquatic", "wetland", "forest", "grassland", "arid", "barren"].map(biome => [
       biome, { plants: 0, herbivores: 0, predators: 0 }
@@ -422,7 +452,11 @@ export function getWorldStats(world) {
   return {
     day: world.day, plants: world.plants.length, herbivores: world.herbivores.length,
     predators: world.predators.length, totalOrganisms: world.herbivores.length + world.predators.length,
-    habitats
+    habitats,
+    genetics: {
+      herbivores: summarizeTraits(world.herbivores),
+      predators: summarizeTraits(world.predators)
+    }
   };
 }
 
@@ -468,6 +502,12 @@ export function restoreWorld(serialized) {
   }
 
   world.config = { ...DEFAULT_CONFIG, ...world.config };
+  // Version 1 saves created before genetics receive neutral inherited traits.
+  for (const animal of [...world.herbivores, ...world.predators]) {
+    animal.generation ??= 0;
+    animal.parentId ??= null;
+    animal.traits ??= { speed: 1, metabolism: 1, efficiency: 1 };
+  }
   world.terrain ??= createTerrain(world.seed, world.config);
   // Migrate 0.6 terrain cells to the hydrology-aware terrain schema.
   if (world.terrain && Array.isArray(world.terrain.cells)) {
@@ -525,6 +565,16 @@ export function restoreWorld(serialized) {
         !Number.isFinite(entity.y) ||
         !Number.isFinite(entity.energy)) {
       throw new Error("El guardado contiene una entidad inválida.");
+    }
+  }
+  for (const animal of [...world.herbivores, ...world.predators]) {
+    const traits = animal.traits;
+    if (!Number.isInteger(animal.generation) || animal.generation < 0 ||
+        !(animal.parentId === null || Number.isInteger(animal.parentId)) ||
+        !traits || ["speed", "metabolism", "efficiency"].some(key =>
+          !Number.isFinite(traits[key]) || traits[key] < 0.65 || traits[key] > 1.35
+        )) {
+      throw new Error("El guardado contiene genética inválida.");
     }
   }
 
