@@ -31,7 +31,7 @@ input{width:125px;background:#111b14;color:#e7eee4;border:1px solid #526b52;bord
 .stat strong{display:block;font-size:22px;margin-top:3px;font-variant-numeric:tabular-nums}
 .legend{display:flex;gap:16px;flex-wrap:wrap;color:#aebbad;font-size:12px;margin:13px 2px}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
-.section-label{font-size:11px;color:#91a18e;text-transform:uppercase;letter-spacing:.12em;margin:13px 2px 6px}
+.section-label{font-size:11px;color:#91a18e;text-transform:uppercase;letter-spacing:.12em;margin:13px 2px 6px}\n.event-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}.event-list li{background:#1b281e;border:1px solid #334437;border-radius:7px;padding:8px 10px;color:#c3d0bf;font-size:12px}
 footer{font-size:12px;color:#9aaa98;margin-top:16px}
 @media(max-width:600px){header{align-items:start;flex-direction:column}}
 </style>
@@ -46,7 +46,7 @@ footer{font-size:12px;color:#9aaa98;margin-top:16px}
 <button id="slower">− Velocidad</button><button id="faster">+ Velocidad</button><span id="speed" style="color:#9fb09d;font-size:12px">1× velocidad</span>
 </div><div id="seed-error" role="status" aria-live="polite"></div>
 <div class="stats" aria-live="polite"><div class="stat"><span>Herbívoros</span><strong id="herb">—</strong></div><div class="stat"><span>Depredadores</span><strong id="pred">—</strong></div><div class="stat"><span>Vegetación</span><strong id="plants">—</strong></div><div class="stat"><span>Día</span><strong id="day">0</strong></div></div>
-<div class="section-label">Evolución de las poblaciones · últimos 300 días</div>
+<div class="section-label">Acontecimientos recientes</div>\n<ul id="event-log" class="event-list" aria-live="polite"><li>La simulación está arrancando…</li></ul>\n<div class="section-label">Evolución de las poblaciones · últimos 300 días</div>
 <canvas id="history" width="960" height="150" aria-label="Gráfico histórico de vegetación, herbívoros y depredadores"></canvas>
 <div class="legend"><span><i class="dot" style="background:#9acb79"></i>Vegetación</span><span><i class="dot" style="background:#e6c879"></i>Herbívoros</span><span><i class="dot" style="background:#d77e69"></i>Depredadores</span></div>
 </section>
