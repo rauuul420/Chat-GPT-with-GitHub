@@ -57,12 +57,17 @@ footer{font-size:12px;color:#9aaa98;margin-top:16px}
   <p>Ejecuta varios mundos independientes con semillas reproducibles y compara sus resultados. Estos experimentos no modifican el mundo que tienes abierto.</p>
   <div class="experiment-controls">
     <label>Escenario<select id="experiment-scenario"><option value="balanced">Ecosistema equilibrado</option><option value="herbivore_bloom">Explosión de herbívoros</option><option value="predator_pressure">Presión de depredadores</option><option value="scarce_resources">Escasez de recursos</option><option value="predator_free">Sin depredadores</option></select></label>
+    <label>Crecimiento vegetal/día<input id="experiment-plant-growth" type="number" min="0" max="20" step="1" placeholder="Escenario"></label>
+    <label>Coste herbívoro<input id="experiment-herbivore-cost" type="number" min="0.01" max="5" step="0.01" placeholder="Escenario"></label>
+    <label>Coste depredador<input id="experiment-predator-cost" type="number" min="0.01" max="5" step="0.01" placeholder="Escenario"></label>
+    <label>Velocidad depredador<input id="experiment-predator-speed" type="number" min="0.1" max="3" step="0.05" placeholder="Escenario"></label>
     <label>Ejecuciones (1–20)<input id="experiment-runs" type="number" min="1" max="20" value="5"></label>
     <label>Días por mundo (1–3000)<input id="experiment-days" type="number" min="1" max="3000" value="500"></label>
     <label>Semilla base<input id="experiment-seed" type="number" min="0" max="4294967295" value="20261113"></label>
     <button id="run-experiment" class="primary">Ejecutar lote</button>
     <button id="export-experiments">Exportar CSV</button>
   </div>
+  <div id="experiment-scenario-description" style="font-size:12px;color:#9fb09d;margin-top:8px"></div>
   <div id="experiment-status" role="status" aria-live="polite">Listo para ejecutar.</div>
   <div id="experiment-summary"></div>
   <div style="overflow-x:auto"><table class="experiment-table"><thead><tr><th>Semilla</th><th>Herbívoros</th><th>Depredadores</th><th>Plantas</th><th>Ext. herb.</th><th>Ext. dep.</th></tr></thead><tbody id="experiment-results"></tbody></table></div>
