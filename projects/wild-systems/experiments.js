@@ -113,7 +113,8 @@ export function runExperiment(seed, days, config = {}) {
       predators: peak.predators
     },
     extinctionDays,
-    eventTotals: { ...world.eventTotals }
+    eventTotals: { ...world.eventTotals },
+    genetics: final.genetics
   };
 }
 
@@ -123,15 +124,29 @@ export function summarizeExperiments(results) {
   }
 
   const averageFinal = { plants: 0, herbivores: 0, predators: 0 };
+  const averageGenetics = Object.fromEntries(["herbivores", "predators"].map(species => [
+    species, { speed: 0, metabolism: 0, efficiency: 0, averageGeneration: 0 }
+  ]));
   for (const result of results) {
     for (const species of Object.keys(averageFinal)) {
       averageFinal[species] += result.final[species] / results.length;
+    }
+    for (const species of ["herbivores", "predators"]) {
+      for (const trait of Object.keys(averageGenetics[species])) {
+        averageGenetics[species][trait] += (result.genetics?.[species]?.[trait] ?? 0) / results.length;
+      }
+    }
+  }
+  for (const species of ["herbivores", "predators"]) {
+    for (const trait of Object.keys(averageGenetics[species])) {
+      averageGenetics[species][trait] = Number(averageGenetics[species][trait].toFixed(3));
     }
   }
 
   return {
     runs: results.length,
     averageFinal,
+    averageGenetics,
     herbivoreExtinctionRate: Math.round(
       results.filter(result => result.extinctionDays.herbivores !== null).length / results.length * 100
     ),
