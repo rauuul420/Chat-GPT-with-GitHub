@@ -505,6 +505,9 @@ element("run-experiment").addEventListener("click", async () => {
   button.disabled = true;
   element("experiment-scenario").disabled = true;
   element("clear-experiments").disabled = true;
+  element("export-experiments").disabled = true;
+  element("export-experiment-settings").disabled = true;
+  element("import-experiment-settings").disabled = true;
   for (const id of ["experiment-plant-growth","experiment-season-length","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed","experiment-herbivore-maturity","experiment-predator-maturity"]) element(id).disabled = true;
   element("experiment-status").textContent = "Añadiendo resultados al laboratorio…";
 
@@ -528,6 +531,9 @@ element("run-experiment").addEventListener("click", async () => {
   } finally {
     button.disabled = false;
     element("clear-experiments").disabled = false;
+    element("export-experiments").disabled = false;
+    element("export-experiment-settings").disabled = false;
+    element("import-experiment-settings").disabled = false;
     element("experiment-scenario").disabled = false;
     for (const id of ["experiment-plant-growth","experiment-season-length","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed","experiment-herbivore-maturity","experiment-predator-maturity"]) element(id).disabled = false;
   }
