@@ -38,7 +38,7 @@ footer{font-size:12px;color:#9aaa98;margin-top:16px}
 .experiment-panel{margin-top:14px;background:#1b281e;border:1px solid #334437;border-radius:10px;padding:12px}.experiment-controls{display:flex;flex-wrap:wrap;gap:9px;align-items:end}.experiment-controls label{display:grid;gap:5px;color:#aebbad;font-size:11px}.experiment-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px}.experiment-table th,.experiment-table td{text-align:right;padding:7px 6px;border-bottom:1px solid #334437}.experiment-table th{color:#9fb09d;font-weight:600}.experiment-table td{font-variant-numeric:tabular-nums}#experiment-status,#experiment-summary{font-size:12px;color:#aebbad;margin-top:9px;line-height:1.5}button:disabled{opacity:.55;cursor:wait}</style>
 </head>
 <body><main>
-<header><div><div class="eyebrow">An experiment in emergent behaviour</div><h1>Wild Systems</h1><p>A tiny world that runs by its own rules. No scripted story. Just life, pressure and consequences.</p></div><div class="tag">PROTOTYPE 0.6 · SPATIAL ECOLOGY</div></header>
+<header><div><div class="eyebrow">An experiment in emergent behaviour</div><h1>Wild Systems</h1><p>A tiny world that runs by its own rules. No scripted story. Just life, pressure and consequences.</p></div><div class="tag">PROTOTYPE 0.7 · LOCAL HYDROLOGY</div></header>
 <section class="panel">
 <canvas id="world" width="960" height="540" aria-label="Simulación de un ecosistema"></canvas>
 <div class="toolbar">
@@ -48,7 +48,7 @@ footer{font-size:12px;color:#9aaa98;margin-top:16px}
 </div><div id="seed-error" role="status" aria-live="polite"></div>
 <div class="stats" aria-live="polite"><div class="stat"><span>Herbívoros</span><strong id="herb">—</strong></div><div class="stat"><span>Depredadores</span><strong id="pred">—</strong></div><div class="stat"><span>Vegetación</span><strong id="plants">—</strong></div><div class="stat"><span>Día</span><strong id="day">0</strong></div></div>
 <div class="environment-readout" id="environment" aria-live="polite">Invierno · 2 °C · Día 90/90</div>
-<div class="terrain-legend" aria-label="El mapa muestra la fertilidad y humedad del terreno: las zonas verdes más intensas tienen más recursos.">Terreno: verde intenso = mayor fertilidad y humedad</div>
+<div class="terrain-legend" aria-label="El mapa muestra fertilidad, humedad del suelo y agua superficial. Las zonas verdes intensas indican mayor idoneidad vegetal; el azul representa agua acumulada.">Terreno: verde intenso = hábitat favorable · azul = agua superficial</div>
 <div class="section-label">Organismo seleccionado</div><div id="organism-inspector" class="event-list" role="status" aria-live="polite">Haz clic sobre un herbívoro o depredador para inspeccionarlo.</div>
 <div class="section-label">Acontecimientos recientes</div>
 <ul id="event-log" class="event-list" aria-live="polite"><li>La simulación está arrancando…</li></ul>
