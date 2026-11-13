@@ -36,7 +36,7 @@ GitHub Actions runs the test suite when files in this project change.
 - **Seasons and climate** follow a deterministic four-season calendar. Seasonal rainfall and evaporation feed a local water cycle: rain accumulates on the surface, infiltrates soil, evaporates or runs towards lower neighbouring cells. Soil moisture and surface water remain separate state variables.
 - **Herbivores** choose vegetation using distance, local plant suitability and biome affinity, then consume energy, reproduce, and die.
 - **Predators** favour suitable habitats and local concentrations of herbivores when selecting prey, then reproduce when sufficiently fed.
-- **Genetics** gives each animal speed, metabolism and feeding-efficiency traits. Asexual offspring inherit these traits with independent small mutations; generation and parent IDs are tracked, population-average traits are visible live, and experiment batches export trait averages for both species.
+- **Genetics** gives each animal speed, metabolism and feeding-efficiency traits. Asexual offspring inherit these traits with independent small mutations; generation and parent IDs are tracked, population-average traits and their ranges are visible live, and experiment batches calculate initial-to-final trait changes for both species and export the results to CSV.
 - Pause, resume, advance one day, reset, and adjust simulation speed.
 - A deterministic seeded random generator makes runs reproducible; enter a seed in the interface to replay a world.
 - The simulation runs on a fixed time step, independent of display refresh rate.
@@ -103,8 +103,8 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Add small bounded mutations during reproduction.
 - [x] Make traits affect movement, energy use and feeding outcomes.
 - [x] Track generation and parent lineage, including save migration.
-- [x] Expose live population-average traits and include them in experiment summaries and CSV exports.
-- [ ] Measure trait distributions and selection pressure across experiment batches.
+- [x] Expose live trait averages and ranges for both populations.
+- [x] Measure initial-to-final trait shifts across experiment batches and export selection indicators to CSV.
 
 ### 0.9 — Habitat-aware ecology
 - [x] Give herbivores biome affinities when selecting vegetation.
