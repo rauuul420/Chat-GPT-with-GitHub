@@ -106,7 +106,8 @@ export function runExperiment(seed, days, config = {}) {
     final: {
       plants: final.plants,
       herbivores: final.herbivores,
-      predators: final.predators
+      predators: final.predators,
+      lifeStages: final.lifeStages
     },
     mean: {
       plants: sums.plants / days,
@@ -132,6 +133,10 @@ export function summarizeExperiments(results) {
   }
 
   const averageFinal = { plants: 0, herbivores: 0, predators: 0 };
+  const averageLifeStages = {
+    herbivores: { juveniles: 0, adults: 0 },
+    predators: { juveniles: 0, adults: 0 }
+  };
   const averageGenetics = Object.fromEntries(["herbivores", "predators"].map(species => [
     species, { speed: 0, metabolism: 0, efficiency: 0, averageGeneration: 0 }
   ]));
@@ -141,6 +146,11 @@ export function summarizeExperiments(results) {
   for (const result of results) {
     for (const species of Object.keys(averageFinal)) {
       averageFinal[species] += result.final[species] / results.length;
+    }
+    for (const species of ["herbivores", "predators"]) {
+      for (const stage of ["juveniles", "adults"]) {
+        averageLifeStages[species][stage] += (result.final.lifeStages?.[species]?.[stage] ?? 0) / results.length;
+      }
     }
     for (const species of ["herbivores", "predators"]) {
       for (const trait of Object.keys(averageGenetics[species])) {
@@ -163,6 +173,7 @@ export function summarizeExperiments(results) {
   return {
     runs: results.length,
     averageFinal,
+    averageLifeStages,
     averageGenetics,
     averageGeneticChange,
     herbivoreExtinctionRate: Math.round(
