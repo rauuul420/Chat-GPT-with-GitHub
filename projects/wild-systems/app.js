@@ -93,6 +93,15 @@ function updateStats() {
 function drawWorld() {
   context.fillStyle = "#17261b";
   context.fillRect(0, 0, width, height);
+
+  for (const cell of world.terrain.cells) {
+    const green = Math.round(48 + cell.fertility * 54);
+    const blue = Math.round(28 + cell.moisture * 30);
+    const alpha = (0.12 + cell.growthWeight * 0.22).toFixed(3);
+    context.fillStyle = `rgba(70, ${green}, ${blue}, ${alpha})`;
+    context.fillRect(cell.left, cell.top, cell.width, cell.height);
+  }
+
   context.strokeStyle = "#263a2a";
   context.lineWidth = 1;
 
