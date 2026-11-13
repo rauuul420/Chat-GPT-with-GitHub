@@ -1,3 +1,5 @@
+import { getEnvironment } from "./environment.js";
+
 const DEFAULT_CONFIG = Object.freeze({
   width: 960,
   height: 540,
@@ -8,6 +10,7 @@ const DEFAULT_CONFIG = Object.freeze({
   maxHerbivores: 150,
   maxPredators: 45,
   plantGrowthPerDay: 3,
+  seasonLengthDays: 90,
   herbivoreSpeed: 0.85,
   predatorSpeed: 1.05,
   herbivoreDailyCost: 0.19,
@@ -102,6 +105,7 @@ export function createWorld(seed = 1, overrides = {}) {
     rngState: normalizedSeed,
     nextId: 1,
     day: 0,
+    plantGrowthRemainder: 0,
     nextEventId: 1,
     events: [],
     eventTotals: {},
@@ -137,7 +141,12 @@ export function stepWorld(world) {
   const { config } = world;
   world.day += 1;
 
-  for (let i = 0; i < config.plantGrowthPerDay; i++) {
+  const environment = getEnvironment(world.day, config);
+  const growthBudget = config.plantGrowthPerDay * environment.plantGrowthMultiplier
+    + (world.plantGrowthRemainder ?? 0);
+  const growthCount = Math.floor(growthBudget);
+  world.plantGrowthRemainder = growthBudget - growthCount;
+  for (let i = 0; i < growthCount; i++) {
     if (world.plants.length >= config.maxPlants) break;
     world.plants.push(createPlant(world, config));
   }
@@ -149,7 +158,7 @@ export function stepWorld(world) {
   for (const herbivore of world.herbivores) {
     const food = nearest(world.plants, herbivore);
     moveAnimal(world, herbivore, food, config.herbivoreSpeed, config);
-    herbivore.energy -= config.herbivoreDailyCost;
+    herbivore.energy -= config.herbivoreDailyCost * environment.herbivoreCostMultiplier;
     herbivore.age += 1;
 
     if (food && distance(herbivore, food) < 9) {
@@ -189,7 +198,7 @@ export function stepWorld(world) {
   for (const predator of world.predators) {
     const prey = nearest(world.herbivores, predator);
     moveAnimal(world, predator, prey, config.predatorSpeed, config);
-    predator.energy -= config.predatorDailyCost;
+    predator.energy -= config.predatorDailyCost * environment.predatorCostMultiplier;
     predator.age += 1;
 
     if (prey && distance(predator, prey) < 11) {
@@ -282,6 +291,10 @@ export function restoreWorld(serialized) {
     throw new Error("El guardado contiene parámetros fuera de rango.");
   }
 
+  world.plantGrowthRemainder ??= 0;
+  if (!Number.isFinite(world.plantGrowthRemainder) || world.plantGrowthRemainder < 0 || world.plantGrowthRemainder >= 1) {
+    throw new Error("El guardado contiene un acumulador de crecimiento vegetal inválido.");
+  }
   world.eventTotals ??= {};
   if (!world.eventTotals || typeof world.eventTotals !== "object" || Array.isArray(world.eventTotals)) {
     throw new Error("El guardado contiene contadores de acontecimientos inválidos.");
