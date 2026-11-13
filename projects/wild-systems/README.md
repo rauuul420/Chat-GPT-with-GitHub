@@ -18,9 +18,10 @@ Then open [http://localhost:8000](http://localhost:8000).
 
 No build step or third-party dependency installation is required.
 
-For automated tests, use Node.js 20 or newer:
+For syntax checks and automated tests, use Node.js 20 or newer:
 
 ```bash
+npm run check
 npm test
 ```
 
