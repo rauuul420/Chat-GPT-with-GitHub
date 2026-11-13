@@ -35,7 +35,7 @@ GitHub Actions runs the test suite when files in this project change.
 - Pause, resume, advance one day, reset, and adjust simulation speed.
 - A deterministic seeded random generator makes runs reproducible; enter a seed in the interface to replay a world.
 - The simulation runs on a fixed time step, independent of display refresh rate.
-- A rolling population chart tracks vegetation, herbivores, and predators over the last 300 simulated days.\n- A concise event feed reports feeding, births, deaths, and predation.
+- A rolling population chart tracks vegetation, herbivores, and predators over the last 300 simulated days.\n- A concise event feed reports feeding, births, deaths, and predation.\n- Export and import complete world saves as versioned JSON files.
 
 ## Project structure
 
@@ -57,7 +57,7 @@ projects/wild-systems/
 - The model is an exploratory toy model, not a scientifically calibrated ecological model.
 - Predators act after the herbivore phase, so newly born herbivores can be hunted on the day they are born. Newborns do not otherwise take a turn in their birth phase.
 - The nearest-target search is currently linear in the number of available targets; spatial indexing will matter for larger worlds.
-- Save/load, population history, and world editing are not implemented yet.
+- The population chart starts a fresh history window after loading a save; historical chart samples are not yet included in save files.\n- World editing is not implemented yet.
 
 ## Roadmap
 
@@ -68,14 +68,14 @@ projects/wild-systems/
 - [x] Add automated tests for reproducibility and invariants.
 - [x] Add continuous integration for the simulation tests.
 - [x] Add a bounded event model for births, deaths, feeding, and predation.
-- [ ] Add state serialization and restore tests.
+- [x] Add versioned state serialization and restore tests.
 
 ### 0.3 — Observe the ecosystem
 - [x] Population history chart (rolling 300-day window).
 - [x] Event log with explanations for major population changes.
 - [ ] Inspect individual organisms and their current energy/age.
 - [x] Seed entry for reproducible experiments.
-- [ ] Copyable experiment settings.
+- [x] Export and import complete world state as JSON.\n- [ ] Copyable experiment settings.
 
 ### 0.4 — More interesting worlds
 - [ ] Seasons and environmental variation.
