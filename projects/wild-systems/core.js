@@ -102,6 +102,8 @@ export function createWorld(seed = 1, overrides = {}) {
     rngState: normalizedSeed,
     nextId: 1,
     day: 0,
+    nextEventId: 1,
+    events: [],
     config,
     plants: [],
     herbivores: [],
@@ -117,6 +119,16 @@ export function createWorld(seed = 1, overrides = {}) {
   }
 
   return world;
+}
+
+function recordEvent(world, type, details = {}) {
+  world.events.push({
+    id: world.nextEventId++,
+    day: world.day,
+    type,
+    ...details
+  });
+  if (world.events.length > 200) world.events.shift();
 }
 
 export function stepWorld(world) {
@@ -140,6 +152,7 @@ export function stepWorld(world) {
 
     if (food && distance(herbivore, food) < 9) {
       herbivore.energy += config.herbivoreFoodGain;
+      recordEvent(world, "herbivore_feeding", { organismId: herbivore.id });
       const foodIndex = world.plants.findIndex(plant => plant.id === food.id);
       if (foodIndex !== -1) world.plants.splice(foodIndex, 1);
     }
@@ -147,15 +160,22 @@ export function stepWorld(world) {
     if (herbivore.energy > config.herbivoreBirthThreshold &&
         world.herbivores.length + herbivoreBirths.length < config.maxHerbivores) {
       herbivore.energy *= 0.53;
-      herbivoreBirths.push(createAnimal(
+      const newborn = createAnimal(
         world, "herbivore", config,
         herbivore.x + random(world, -8, 8),
         herbivore.y + random(world, -8, 8)
-      ));
+      );
+      herbivoreBirths.push(newborn);
+      recordEvent(world, "herbivore_birth", { organismId: newborn.id, parentId: herbivore.id });
     }
 
     if (herbivore.energy > 0 && herbivore.age < config.herbivoreMaxAge) {
       survivingHerbivores.push(herbivore);
+    } else {
+      recordEvent(world, "herbivore_death", {
+        organismId: herbivore.id,
+        cause: herbivore.age >= config.herbivoreMaxAge ? "age" : "energy"
+      });
     }
   }
 
@@ -172,6 +192,7 @@ export function stepWorld(world) {
 
     if (prey && distance(predator, prey) < 11) {
       predator.energy += config.predatorFoodGain;
+      recordEvent(world, "predation", { predatorId: predator.id, preyId: prey.id });
       const preyIndex = world.herbivores.findIndex(item => item.id === prey.id);
       if (preyIndex !== -1) world.herbivores.splice(preyIndex, 1);
     }
@@ -179,15 +200,22 @@ export function stepWorld(world) {
     if (predator.energy > config.predatorBirthThreshold &&
         world.predators.length + predatorBirths.length < config.maxPredators) {
       predator.energy *= 0.55;
-      predatorBirths.push(createAnimal(
+      const newborn = createAnimal(
         world, "predator", config,
         predator.x + random(world, -8, 8),
         predator.y + random(world, -8, 8)
-      ));
+      );
+      predatorBirths.push(newborn);
+      recordEvent(world, "predator_birth", { organismId: newborn.id, parentId: predator.id });
     }
 
     if (predator.energy > 0 && predator.age < config.predatorMaxAge) {
       survivingPredators.push(predator);
+    } else {
+      recordEvent(world, "predator_death", {
+        organismId: predator.id,
+        cause: predator.age >= config.predatorMaxAge ? "age" : "energy"
+      });
     }
   }
 
