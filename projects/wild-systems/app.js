@@ -103,6 +103,14 @@ function updateStats() {
     line.textContent = `${habitatNames[biome]}: ${counts.herbivores} herbívoros · ${counts.predators} depredadores · ${counts.plants} plantas`;
     habitatPanel.append(line);
   }
+  const lifeStagePanel = element("life-stage-stats");
+  lifeStagePanel.replaceChildren();
+  for (const [species, label] of [["herbivores", "Herbívoros"], ["predators", "Depredadores"]]) {
+    const stages = stats.lifeStages[species];
+    const line = document.createElement("div");
+    line.textContent = `${label}: ${stages.juveniles} juveniles · ${stages.adults} adultos`;
+    lifeStagePanel.append(line);
+  }
   const geneticsPanel = element("genetics-stats");
   geneticsPanel.replaceChildren();
   for (const [species, label] of [["herbivores", "Herbívoros"], ["predators", "Depredadores"]]) {
@@ -442,7 +450,7 @@ function renderExperimentResults(results) {
       return `velocidad ${signed(values.speed)}, metabolismo ${signed(values.metabolism)}, eficiencia ${signed(values.efficiency)}`;
     };
     line.textContent =
-      `${group[0].scenarioLabel} (${parameters}) · ${summary.runs} ejecuciones · Media final: ${summary.averageFinal.herbivores.toFixed(1)} herbívoros, ${summary.averageFinal.predators.toFixed(1)} depredadores y ${summary.averageFinal.plants.toFixed(1)} plantas · Cambio genético medio: herbívoros (${change("herbivores")}), depredadores (${change("predators")}) · Extinción: herbívoros ${summary.herbivoreExtinctionRate}%, depredadores ${summary.predatorExtinctionRate}%.`;
+      `${group[0].scenarioLabel} (${parameters}) · ${summary.runs} ejecuciones · Media final: ${summary.averageFinal.herbivores.toFixed(1)} herbívoros, ${summary.averageFinal.predators.toFixed(1)} depredadores y ${summary.averageFinal.plants.toFixed(1)} plantas · Edad final media: herbívoros ${summary.averageLifeStages.herbivores.juveniles.toFixed(1)} juveniles/${summary.averageLifeStages.herbivores.adults.toFixed(1)} adultos, depredadores ${summary.averageLifeStages.predators.juveniles.toFixed(1)} juveniles/${summary.averageLifeStages.predators.adults.toFixed(1)} adultos · Cambio genético medio: herbívoros (${change("herbivores")}), depredadores (${change("predators")}) · Extinción: herbívoros ${summary.herbivoreExtinctionRate}%, depredadores ${summary.predatorExtinctionRate}%.`;
     element("experiment-summary").append(line);
   }
 }
@@ -546,13 +554,15 @@ element("export-experiments").addEventListener("click", () => {
     return;
   }
 
-  const headers = ["scenario","seed","days","final_plants","final_herbivores","final_predators","herbivore_extinction_day","predator_extinction_day","mean_plants","mean_herbivores","mean_predators","peak_plants","peak_herbivores","peak_predators","herbivore_mean_speed","herbivore_mean_metabolism","herbivore_mean_efficiency","herbivore_mean_generation","predator_mean_speed","predator_mean_metabolism","predator_mean_efficiency","predator_mean_generation","herbivore_delta_speed","herbivore_delta_metabolism","herbivore_delta_efficiency","predator_delta_speed","predator_delta_metabolism","predator_delta_efficiency","event_totals_json","config_json"];
+  const headers = ["scenario","seed","days","final_plants","final_herbivores","final_predators","herbivore_extinction_day","predator_extinction_day","mean_plants","mean_herbivores","mean_predators","peak_plants","peak_herbivores","peak_predators","final_herbivore_juveniles","final_herbivore_adults","final_predator_juveniles","final_predator_adults","herbivore_mean_speed","herbivore_mean_metabolism","herbivore_mean_efficiency","herbivore_mean_generation","predator_mean_speed","predator_mean_metabolism","predator_mean_efficiency","predator_mean_generation","herbivore_delta_speed","herbivore_delta_metabolism","herbivore_delta_efficiency","predator_delta_speed","predator_delta_metabolism","predator_delta_efficiency","event_totals_json","config_json"];
   const rows = lastExperimentResults.map(result => [
     result.scenario, result.seed, result.days, result.final.plants, result.final.herbivores,
     result.final.predators, result.extinctionDays.herbivores ?? "",
     result.extinctionDays.predators ?? "", result.mean.plants,
     result.mean.herbivores, result.mean.predators, result.peak.plants,
     result.peak.herbivores, result.peak.predators,
+    result.final.lifeStages.herbivores.juveniles, result.final.lifeStages.herbivores.adults,
+    result.final.lifeStages.predators.juveniles, result.final.lifeStages.predators.adults,
     result.genetics.herbivores.speed, result.genetics.herbivores.metabolism,
     result.genetics.herbivores.efficiency, result.genetics.herbivores.averageGeneration,
     result.genetics.predators.speed, result.genetics.predators.metabolism,
