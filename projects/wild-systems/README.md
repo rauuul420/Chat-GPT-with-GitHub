@@ -49,6 +49,7 @@ projects/wild-systems/
 ├── index.html          # Interface and canvas
 ├── app.js              # Rendering, controls, animation loop
 ├── experiments.js      # Scenarios and reproducible multi-run experiment runner
+├── environment.js      # Deterministic seasons and climate
 ├── core.js             # Pure simulation rules and world state
 ├── package.json        # Native Node test command
 ├── README.md
