@@ -447,3 +447,23 @@ test("seasonal environment exposes separate rainfall and evaporation rates", () 
   assert.equal(typeof spring.precipitation, "number");
   assert.equal(typeof spring.evaporation, "number");
 });
+
+
+test("surface runoff transfers excess water to a lower neighbouring cell", () => {
+  const world = createWorld(20261117, {
+    initialPlants: 0, initialHerbivores: 0, initialPredators: 0, plantGrowthPerDay: 0
+  });
+  for (const cell of world.terrain.cells) {
+    cell.elevation = 1;
+    cell.surfaceWater = 0;
+  }
+  const source = world.terrain.cells[0];
+  const destination = world.terrain.cells[1];
+  source.elevation = 0.9;
+  source.surfaceWater = 1;
+  destination.elevation = 0.1;
+
+  stepWorld(world);
+  assert.ok(destination.surfaceWater > 0);
+  assert.ok(source.surfaceWater < 1);
+});
