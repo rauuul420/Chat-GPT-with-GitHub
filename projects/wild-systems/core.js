@@ -285,8 +285,11 @@ export function restoreWorld(serialized) {
     throw new Error("El guardado está incompleto o tiene una estructura incorrecta.");
   }
 
+  world.config = { ...DEFAULT_CONFIG, ...world.config };
+
   if (!Number.isFinite(world.config.width) || world.config.width <= 0 ||
       !Number.isFinite(world.config.height) || world.config.height <= 0 ||
+      !Number.isInteger(world.config.seasonLengthDays) || world.config.seasonLengthDays < 1 || world.config.seasonLengthDays > 10000 ||
       world.day < 0 || world.nextId < 1 || world.nextEventId < 1) {
     throw new Error("El guardado contiene parámetros fuera de rango.");
   }
