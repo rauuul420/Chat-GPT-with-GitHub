@@ -378,16 +378,18 @@ function renderExperimentResults(results) {
 
   const groups = new Map();
   for (const result of results) {
-    if (!groups.has(result.scenario)) groups.set(result.scenario, []);
-    groups.get(result.scenario).push(result);
+    const groupKey = `${result.scenario}:${JSON.stringify(result.config)}`;
+    if (!groups.has(groupKey)) groups.set(groupKey, []);
+    groups.get(groupKey).push(result);
   }
 
   element("experiment-summary").replaceChildren();
   for (const group of groups.values()) {
     const summary = summarizeExperiments(group);
     const line = document.createElement("p");
+    const parameters = Object.entries(group[0].config).map(([key, value]) => `${key}: ${value}`).join(", ") || "valores base";
     line.textContent =
-      `${group[0].scenarioLabel} · ${summary.runs} ejecuciones · Media final: ${summary.averageFinal.herbivores.toFixed(1)} herbívoros, ${summary.averageFinal.predators.toFixed(1)} depredadores y ${summary.averageFinal.plants.toFixed(1)} plantas · Extinción: herbívoros ${summary.herbivoreExtinctionRate}%, depredadores ${summary.predatorExtinctionRate}%.`;
+      `${group[0].scenarioLabel} (${parameters}) · ${summary.runs} ejecuciones · Media final: ${summary.averageFinal.herbivores.toFixed(1)} herbívoros, ${summary.averageFinal.predators.toFixed(1)} depredadores y ${summary.averageFinal.plants.toFixed(1)} plantas · Extinción: herbívoros ${summary.herbivoreExtinctionRate}%, depredadores ${summary.predatorExtinctionRate}%.`;
     element("experiment-summary").append(line);
   }
 }
