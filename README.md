@@ -24,6 +24,17 @@ Use this space to:
 6. **Be ambitious, but incremental.** Work in small, verifiable steps that can grow into larger systems.
 7. **Make decisions explicit.** Record important architectural and product decisions so future work has context.
 
+## Active projects
+
+### Wild Systems — ecosystem simulation
+
+An experimental 2D ecosystem where vegetation, herbivores, and predators interact through simple rules. The current prototype includes reproducible seeded worlds, a population history chart, and a recent-events feed.
+
+- **Status:** Prototype 0.3
+- **Technology:** Native JavaScript modules, HTML Canvas, Node.js built-in test runner
+- **Project:** [projects/wild-systems](./projects/wild-systems/)
+- **Run instructions and roadmap:** [Wild Systems README](./projects/wild-systems/README.md)
+
 ## How work is organized
 
 The repository may contain several independent projects and experiments. A project should earn a permanent place here by demonstrating a clear purpose and a credible path to completion.
