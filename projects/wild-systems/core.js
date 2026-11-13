@@ -65,7 +65,7 @@ function getHabitatSuitability(cell) {
     aquatic: 0.12, wetland: 0.72, forest: 1.08,
     grassland: 1, arid: 0.48, barren: 0.32
   }[cell.biome];
-  return cell.fertility * moistureSuitability * biomeFactor;
+  return Math.min(1, cell.fertility * moistureSuitability * biomeFactor);
 }
 
 export function createTerrain(seed, config = DEFAULT_CONFIG) {
@@ -168,7 +168,7 @@ function calculatePreyDensity(world) {
   for (const prey of world.herbivores) {
     let nearby = 0;
     for (const other of world.herbivores) {
-      if (distance(prey, other) <= 105) nearby++;
+      if (distance(prey, other) <= 16) nearby++;
     }
     density.set(prey.id, nearby);
   }
