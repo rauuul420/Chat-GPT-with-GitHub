@@ -23,7 +23,7 @@ button{background:#26382a;color:#e7eee4;border:1px solid #526b52;border-radius:8
 button:hover{background:#354b38}button:focus-visible,input:focus-visible{outline:2px solid #a5c69a;outline-offset:2px}
 button.primary{background:#a5c69a;color:#152016;border-color:#a5c69a;font-weight:700}
 input{width:125px;background:#111b14;color:#e7eee4;border:1px solid #526b52;border-radius:8px;padding:9px}
-.seed-control{display:flex;align-items:center;gap:7px;color:#aebbad;font-size:12px}\n.file-input{display:none}
+.seed-control{display:flex;align-items:center;gap:7px;color:#aebbad;font-size:12px}.file-input{display:none}
 #seed-error{color:#e6a08d;font-size:12px;min-height:18px;margin-top:7px}
 .stats{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
 .stat{flex:1;min-width:110px;background:#1b281e;border:1px solid #334437;border-radius:10px;padding:10px 12px}
@@ -31,10 +31,10 @@ input{width:125px;background:#111b14;color:#e7eee4;border:1px solid #526b52;bord
 .stat strong{display:block;font-size:22px;margin-top:3px;font-variant-numeric:tabular-nums}
 .legend{display:flex;gap:16px;flex-wrap:wrap;color:#aebbad;font-size:12px;margin:13px 2px}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
-.section-label{font-size:11px;color:#91a18e;text-transform:uppercase;letter-spacing:.12em;margin:13px 2px 6px}\n.event-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}.event-list li{background:#1b281e;border:1px solid #334437;border-radius:7px;padding:8px 10px;color:#c3d0bf;font-size:12px}
+.section-label{font-size:11px;color:#91a18e;text-transform:uppercase;letter-spacing:.12em;margin:13px 2px 6px}.event-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}.event-list li{background:#1b281e;border:1px solid #334437;border-radius:7px;padding:8px 10px;color:#c3d0bf;font-size:12px}
 footer{font-size:12px;color:#9aaa98;margin-top:16px}
 @media(max-width:600px){header{align-items:start;flex-direction:column}}
-</style>
+.experiment-panel{margin-top:14px;background:#1b281e;border:1px solid #334437;border-radius:10px;padding:12px}.experiment-controls{display:flex;flex-wrap:wrap;gap:9px;align-items:end}.experiment-controls label{display:grid;gap:5px;color:#aebbad;font-size:11px}.experiment-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px}.experiment-table th,.experiment-table td{text-align:right;padding:7px 6px;border-bottom:1px solid #334437}.experiment-table th{color:#9fb09d;font-weight:600}.experiment-table td{font-variant-numeric:tabular-nums}#experiment-status,#experiment-summary{font-size:12px;color:#aebbad;margin-top:9px;line-height:1.5}button:disabled{opacity:.55;cursor:wait}</style>
 </head>
 <body><main>
 <header><div><div class="eyebrow">An experiment in emergent behaviour</div><h1>Wild Systems</h1><p>A tiny world that runs by its own rules. No scripted story. Just life, pressure and consequences.</p></div><div class="tag">PROTOTYPE 0.3 · OBSERVATION TOOLS</div></header>
@@ -46,9 +46,25 @@ footer{font-size:12px;color:#9aaa98;margin-top:16px}
 <button id="slower">− Velocidad</button><button id="faster">+ Velocidad</button><span id="speed" style="color:#9fb09d;font-size:12px">1× velocidad</span>
 </div><div id="seed-error" role="status" aria-live="polite"></div>
 <div class="stats" aria-live="polite"><div class="stat"><span>Herbívoros</span><strong id="herb">—</strong></div><div class="stat"><span>Depredadores</span><strong id="pred">—</strong></div><div class="stat"><span>Vegetación</span><strong id="plants">—</strong></div><div class="stat"><span>Día</span><strong id="day">0</strong></div></div>
-<div class="section-label">Acontecimientos recientes</div>\n<ul id="event-log" class="event-list" aria-live="polite"><li>La simulación está arrancando…</li></ul>\n<div class="section-label">Evolución de las poblaciones · últimos 300 días</div>
+<div class="section-label">Acontecimientos recientes</div>
+<ul id="event-log" class="event-list" aria-live="polite"><li>La simulación está arrancando…</li></ul>
+<div class="section-label">Evolución de las poblaciones · últimos 300 días</div>
 <canvas id="history" width="960" height="150" aria-label="Gráfico histórico de vegetación, herbívoros y depredadores"></canvas>
 <div class="legend"><span><i class="dot" style="background:#9acb79"></i>Vegetación</span><span><i class="dot" style="background:#e6c879"></i>Herbívoros</span><span><i class="dot" style="background:#d77e69"></i>Depredadores</span></div>
+</section>
+<section class="experiment-panel">
+  <div class="section-label">Laboratorio de experimentos</div>
+  <p>Ejecuta varios mundos independientes con semillas reproducibles y compara sus resultados. Estos experimentos no modifican el mundo que tienes abierto.</p>
+  <div class="experiment-controls">
+    <label>Ejecuciones (1–20)<input id="experiment-runs" type="number" min="1" max="20" value="5"></label>
+    <label>Días por mundo (1–3000)<input id="experiment-days" type="number" min="1" max="3000" value="500"></label>
+    <label>Semilla base<input id="experiment-seed" type="number" min="0" max="4294967295" value="20261113"></label>
+    <button id="run-experiment" class="primary">Ejecutar lote</button>
+    <button id="export-experiments">Exportar CSV</button>
+  </div>
+  <div id="experiment-status" role="status" aria-live="polite">Listo para ejecutar.</div>
+  <div id="experiment-summary"></div>
+  <div style="overflow-x:auto"><table class="experiment-table"><thead><tr><th>Semilla</th><th>Herbívoros</th><th>Depredadores</th><th>Plantas</th><th>Ext. herb.</th><th>Ext. dep.</th></tr></thead><tbody id="experiment-results"></tbody></table></div>
 </section>
 <footer>Experimento autónomo: los animales buscan alimento, consumen energía, se reproducen y mueren. Usa una semilla para repetir exactamente un mundo y comparar sus resultados.</footer>
 </main>
