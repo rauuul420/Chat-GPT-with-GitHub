@@ -28,9 +28,9 @@ Use this space to:
 
 ### Wild Systems — ecosystem simulation
 
-An experimental 2D ecosystem where vegetation, herbivores, and predators interact through simple rules. The current prototype includes reproducible seeded worlds, individual organism inspection, population history and event feeds, versioned JSON saves, a deterministic seasonal climate and local hydrology model, six emergent biomes, and a spatial fertility, elevation, soil moisture and surface-water map, plus a multi-scenario experiment laboratory with custom parameter overrides and CSV export.
+An experimental 2D ecosystem where vegetation, herbivores, and predators interact through simple rules. The current prototype includes reproducible seeded worlds, individual organism inspection, population history and event feeds, versioned JSON saves, a deterministic seasonal climate and local hydrology model, six emergent biomes, habitat-aware animal target selection, live population distribution by biome, and a spatial fertility, elevation, soil moisture and surface-water map, plus a multi-scenario experiment laboratory with custom parameter overrides and CSV export.
 
-- **Status:** Prototype 0.8
+- **Status:** Prototype 0.9
 - **Technology:** Native JavaScript modules, HTML Canvas, Node.js built-in test runner
 - **Project:** [projects/wild-systems](./projects/wild-systems/)
 - **Run instructions and roadmap:** [Wild Systems README](./projects/wild-systems/README.md)
