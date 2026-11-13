@@ -75,3 +75,23 @@ test("snapshots are detached copies", () => {
   snapshot.plants[0].x = -100;
   assert.notEqual(world.plants[0].x, -100);
 });
+
+test("simulation events are structured and dated", () => {
+  const world = createWorld(20261113);
+  for (let day = 0; day < 250; day++) stepWorld(world);
+
+  assert.ok(world.events.length > 0);
+  assert.ok(world.events.length <= 200);
+  for (const event of world.events) {
+    assert.ok(Number.isInteger(event.id));
+    assert.ok(Number.isInteger(event.day));
+    assert.ok(event.day > 0 && event.day <= world.day);
+    assert.equal(typeof event.type, "string");
+  }
+});
+
+test("event history is bounded", () => {
+  const world = createWorld(2026);
+  for (let day = 0; day < 600; day++) stepWorld(world);
+  assert.ok(world.events.length <= 200);
+});
