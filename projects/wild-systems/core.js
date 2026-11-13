@@ -179,6 +179,16 @@ export function createWorld(seed = 1, overrides = {}) {
   return world;
 }
 
+function updateTerrainMoisture(world, environment) {
+  for (const cell of world.terrain.cells) {
+    const localWeather = Math.sin(world.day * 0.17 + cell.id * 1.37) * 0.00025;
+    cell.moisture = Number(Math.max(0.08, Math.min(0.98,
+      cell.moisture + environment.moistureChange + localWeather
+    )).toFixed(4));
+    cell.growthWeight = Number((cell.fertility * cell.moisture).toFixed(4));
+  }
+}
+
 function recordEvent(world, type, details = {}) {
   world.eventTotals[type] = (world.eventTotals[type] ?? 0) + 1;
   world.events.push({
@@ -195,6 +205,7 @@ export function stepWorld(world) {
   world.day += 1;
 
   const environment = getEnvironment(world.day, config);
+  updateTerrainMoisture(world, environment);
   const growthBudget = config.plantGrowthPerDay * environment.plantGrowthMultiplier
     + (world.plantGrowthRemainder ?? 0);
   const growthCount = Math.floor(growthBudget);
