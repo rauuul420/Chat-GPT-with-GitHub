@@ -37,6 +37,7 @@ GitHub Actions runs the test suite when files in this project change.
 - The simulation runs on a fixed time step, independent of display refresh rate.
 - A rolling population chart tracks vegetation, herbivores, and predators over the last 300 simulated days.
 - A concise event feed reports feeding, births, deaths, and predation.
+- Click an animal to inspect its species, ID, age, energy, and position.
 - Export and import complete world saves as versioned JSON files.
 - Run batches of independent seeded worlds across five starting scenarios, compare final populations and extinction rates, and export CSV results.
 
@@ -82,7 +83,7 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 ### 0.3 — Observe the ecosystem
 - [x] Population history chart (rolling 300-day window).
 - [x] Event log with explanations for major population changes.
-- [ ] Inspect individual organisms and their current energy/age.
+- [x] Inspect individual organisms and their current energy, age, and position.
 - [x] Seed entry for reproducible experiments.
 - [x] Export and import complete world state as JSON.
 - [x] Reproducible multi-seed experiment batches with population and extinction summaries.
