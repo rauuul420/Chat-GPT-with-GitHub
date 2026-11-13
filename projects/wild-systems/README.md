@@ -93,7 +93,7 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [ ] Seasons and environmental variation.
 - [ ] Terrain and resource distribution.
 - [ ] Traits, inheritance, mutation, and selection.
-- [ ] Scenario presets and parameter controls.
+- [x] Five scenario presets for controlled experiments.\n- [ ] Editable simulation parameters and custom scenario saving.
 
 ## Validation questions
 
