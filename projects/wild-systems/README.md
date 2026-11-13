@@ -34,7 +34,7 @@ GitHub Actions runs the test suite when files in this project change.
 - Pause, resume, advance one day, reset, and adjust simulation speed.
 - A deterministic seeded random generator makes runs reproducible; enter a seed in the interface to replay a world.
 - The simulation runs on a fixed time step, independent of display refresh rate.
-- A rolling population chart tracks vegetation, herbivores, and predators over the last 300 simulated days.
+- A rolling population chart tracks vegetation, herbivores, and predators over the last 300 simulated days.\n- A concise event feed reports feeding, births, deaths, and predation.
 
 ## Project structure
 
@@ -66,12 +66,12 @@ projects/wild-systems/
 - [x] Use a fixed-step simulation clock.
 - [x] Add automated tests for reproducibility and invariants.
 - [x] Add continuous integration for the simulation tests.
-- [ ] Add an explicit event model for births, deaths, feeding, and predation.
+- [x] Add a bounded event model for births, deaths, feeding, and predation.
 - [ ] Add state serialization and restore tests.
 
 ### 0.3 — Observe the ecosystem
 - [x] Population history chart (rolling 300-day window).
-- [ ] Event log with explanations for major population changes.
+- [x] Event log with explanations for major population changes.
 - [ ] Inspect individual organisms and their current energy/age.
 - [x] Seed entry for reproducible experiments.
 - [ ] Copyable experiment settings.
