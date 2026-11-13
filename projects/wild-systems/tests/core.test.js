@@ -585,6 +585,7 @@ test("founder animals receive bounded baseline traits and generation zero", () =
     }
     assert.deepEqual(Object.keys(animal.traits).sort(), ["efficiency", "metabolism", "speed"]);
   }
+  assert.ok(new Set(world.herbivores.map(animal => animal.traits.speed)).size > 1);
 });
 
 test("offspring inherit parental traits and record their lineage", () => {
