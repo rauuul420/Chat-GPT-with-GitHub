@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createWorld, createTerrain, stepWorld, getWorldStats, getWorldSnapshot, serializeWorld, restoreWorld } from "../core.js";
+import { createWorld, createTerrain, classifyBiome, stepWorld, getWorldStats, getWorldSnapshot, serializeWorld, restoreWorld } from "../core.js";
 import { runExperiment, summarizeExperiments, getExperimentScenario, EXPERIMENT_SCENARIOS } from "../experiments.js";
 import { getEnvironment } from "../environment.js";
 
@@ -466,4 +466,53 @@ test("surface runoff transfers excess water to a lower neighbouring cell", () =>
   stepWorld(world);
   assert.ok(destination.surfaceWater > 0);
   assert.ok(source.surfaceWater < 1);
+});
+
+
+test("biomes emerge from water, moisture and fertility thresholds", () => {
+  assert.equal(classifyBiome({ surfaceWater: 0.4, moisture: 0.6, fertility: 0.8 }), "aquatic");
+  assert.equal(classifyBiome({ surfaceWater: 0.2, moisture: 0.7, fertility: 0.4 }), "wetland");
+  assert.equal(classifyBiome({ surfaceWater: 0.01, moisture: 0.9, fertility: 0.3 }), "wetland");
+  assert.equal(classifyBiome({ surfaceWater: 0.01, moisture: 0.2, fertility: 0.8 }), "arid");
+  assert.equal(classifyBiome({ surfaceWater: 0.01, moisture: 0.6, fertility: 0.8 }), "forest");
+  assert.equal(classifyBiome({ surfaceWater: 0.01, moisture: 0.6, fertility: 0.5 }), "grassland");
+  assert.equal(classifyBiome({ surfaceWater: 0.01, moisture: 0.6, fertility: 0.2 }), "barren");
+});
+
+test("terrain biomes are deterministic and update with local hydrology", () => {
+  const first = createWorld(20261118, {
+    initialPlants: 0, initialHerbivores: 0, initialPredators: 0, plantGrowthPerDay: 0
+  });
+  const second = createWorld(20261118, {
+    initialPlants: 0, initialHerbivores: 0, initialPredators: 0, plantGrowthPerDay: 0
+  });
+  assert.deepEqual(first.terrain, second.terrain);
+  assert.ok(first.terrain.cells.every(cell =>
+    ["aquatic", "wetland", "forest", "grassland", "arid", "barren"].includes(cell.biome)
+  ));
+  for (let day = 0; day < 540; day++) {
+    stepWorld(first);
+    stepWorld(second);
+  }
+  assert.deepEqual(first.terrain, second.terrain);
+  assert.ok(first.terrain.cells.every(cell =>
+    cell.growthWeight >= 0 && cell.growthWeight <= 1 &&
+    cell.biome === classifyBiome(cell)
+  ));
+});
+
+test("biome classifications and habitat suitability survive save restoration", () => {
+  const world = createWorld(20261119);
+  for (let day = 0; day < 180; day++) stepWorld(world);
+  const restored = restoreWorld(serializeWorld(world));
+  assert.deepEqual(restored.terrain, world.terrain);
+  assert.ok(restored.terrain.cells.every(cell => cell.biome === classifyBiome(cell)));
+});
+
+test("legacy hydrology saves receive biome classifications on migration", () => {
+  const world = createWorld(20261120);
+  const payload = JSON.parse(serializeWorld(world));
+  for (const cell of payload.world.terrain.cells) delete cell.biome;
+  const restored = restoreWorld(payload);
+  assert.ok(restored.terrain.cells.every(cell => cell.biome === classifyBiome(cell)));
 });
