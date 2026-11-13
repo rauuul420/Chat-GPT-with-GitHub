@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createWorld, stepWorld, getWorldStats, getWorldSnapshot, serializeWorld, restoreWorld } from "../core.js";
-import { runExperiment, summarizeExperiments } from "../experiments.js";
+import { runExperiment, summarizeExperiments, getExperimentScenario, EXPERIMENT_SCENARIOS } from "../experiments.js";
 
 test("the same seed creates an identical initial world", () => {
   const first = createWorld(123456);
@@ -211,4 +211,15 @@ test("lifetime event counters are included in snapshots and saves", () => {
   assert.equal(world.eventTotals.herbivore_feeding, 1);
   const restored = restoreWorld(serializeWorld(world));
   assert.deepEqual(restored.eventTotals, world.eventTotals);
+});
+
+test("experiment scenarios provide isolated configuration overrides", () => {
+  const first = getExperimentScenario("scarce_resources");
+  const second = getExperimentScenario("scarce_resources");
+  assert.equal(first.config.plantGrowthPerDay, 1);
+  assert.notEqual(first.config, second.config);
+  first.config.plantGrowthPerDay = 99;
+  assert.equal(getExperimentScenario("scarce_resources").config.plantGrowthPerDay, 1);
+  assert.equal(Object.keys(EXPERIMENT_SCENARIOS).length, 5);
+  assert.throws(() => getExperimentScenario("unknown"), /no existe/);
 });
