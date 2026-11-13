@@ -64,12 +64,22 @@ projects/wild-systems/
 
 ## Experiment laboratory
 
-The browser laboratory can run 1–20 independent worlds for up to 3,000 days per world. Choose one of five scenarios, optionally override vegetation growth, season length, daily energy costs, and predator speed, then run independent seeds derived deterministically from the base seed. Results include final, mean, and peak populations, first extinction day for herbivores and predators, and event totals. Results from different scenario runs accumulate in a comparison table with per-scenario summaries until cleared. Reusing the same base seed across scenarios helps compare different ecological conditions with a consistent seed set. The laboratory keeps up to 500 result rows in memory. Export the full table as CSV for analysis. Batch execution yields between runs so the page can repaint and report progress.
+The browser laboratory can run 1–20 independent worlds for up to 3,000 days per world. Choose one of five scenarios, optionally override vegetation growth, season length, daily energy costs, predator speed, and species maturity ages, then run independent seeds derived deterministically from the base seed. Results include final, mean, and peak populations, first extinction day for herbivores and predators, event totals, final genetic averages, and initial-to-final trait changes. Results from different scenario runs accumulate in a comparison table with per-scenario summaries until cleared. Reusing the same base seed across scenarios helps compare different ecological conditions with a consistent seed set. The laboratory keeps up to 500 result rows in memory. Export the full table as CSV for analysis. Batch execution yields between runs so the page can repaint and report progress.
+
+## Genetic model
+
+- Founders receive independent baseline values from 0.90 to 1.10 for speed, metabolism, and feeding efficiency.
+- Each offspring inherits the three traits from one parent. Each trait mutates independently with an 18% probability; a mutation adds a random value from −0.08 to +0.08.
+- Trait values are clamped to 0.65–1.35 and stored to three decimal places.
+- Speed changes movement speed and predator strike distance; metabolism scales daily energy costs; efficiency scales energy gained from food.
+- Herbivores become adults at 30 days and predators at 45 days by default. These ages can be changed in experiment runs.
+- Experiment summaries report average initial-to-final trait changes. These are descriptive population shifts, not proof of natural selection or a calibrated fitness estimate.
 
 ## Model and current limitations
 
 - The world is a continuous 2D plane with reflecting borders, overlaid by a 12 × 7 ecological grid.
-- Biomes are emergent classifications, recalculated from local conditions each simulation day; they are not hand-painted map regions. Habitat suitability influences where new vegetation establishes.\n- The hydrology model is intentionally simplified: it represents surface runoff between neighbouring cells, infiltration and evaporation, but not groundwater, river networks, erosion or calibrated water volumes. Plant growth is still a population-level regrowth budget distributed by local habitat suitability.
+- Biomes are emergent classifications, recalculated from local conditions each simulation day; they are not hand-painted map regions. Habitat suitability influences where new vegetation establishes.
+- The hydrology model is intentionally simplified: it represents surface runoff between neighbouring cells, infiltration and evaporation, but not groundwater, river networks, erosion or calibrated water volumes. Plant growth is still a population-level regrowth budget distributed by local habitat suitability.
 - A new world starts in spring. The seasonal year has four configurable seasons of 90 days each by default. Spring, summer, autumn and winter modify vegetation growth and daily energy costs; temperature is a deterministic indicator, not yet a physiological survival threshold.
 - Organisms use habitat-weighted target selection with fixed species affinities. Genetics currently uses asexual inheritance from one parent; sexual reproduction, dominance, gene recombination, individual learning, memory, territory and social behaviour are not implemented.
 - The model is an exploratory toy model, not a scientifically calibrated ecological model.
@@ -150,7 +160,7 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Display the current season and temperature.
 
 ### 0.4 — More interesting worlds
-- [ ] Traits, inheritance, mutation, and selection.
+- [x] Traits, inheritance, mutation, and selection.
 - [x] Five scenario presets for controlled experiments.
 - [x] Optional overrides for vegetation growth, energy costs, and predator speed.
 - [ ] Save and share custom scenario configurations.
