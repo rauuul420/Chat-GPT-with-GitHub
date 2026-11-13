@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createWorld, stepWorld, getWorldStats, getWorldSnapshot, serializeWorld, restoreWorld } from "../core.js";
+import { runExperiment, summarizeExperiments } from "../experiments.js";
 
 test("the same seed creates an identical initial world", () => {
   const first = createWorld(123456);
@@ -146,4 +147,47 @@ test("restore rejects unsupported or malformed save files", () => {
     version: 1,
     world: { day: 0 }
   })), /estructura incorrecta/);
+});
+
+test("experiment runs are deterministic for the same seed and parameters", () => {
+  const first = runExperiment(12345, 120);
+  const second = runExperiment(12345, 120);
+  assert.deepEqual(first, second);
+});
+
+test("experiment metrics and extinction dates are internally consistent", () => {
+  const result = runExperiment(77, 30, {
+    initialPlants: 0,
+    initialHerbivores: 0,
+    initialPredators: 0,
+    plantGrowthPerDay: 0
+  });
+  assert.equal(result.days, 30);
+  assert.equal(result.final.herbivores, 0);
+  assert.equal(result.final.predators, 0);
+  assert.equal(result.extinctionDays.herbivores, 0);
+  assert.equal(result.extinctionDays.predators, 0);
+  assert.equal(result.mean.herbivores, 0);
+  assert.equal(result.peak.predators, 0);
+});
+
+test("experiment summaries calculate average outcomes and extinction rates", () => {
+  const first = runExperiment(1, 20, {
+    initialPlants: 0, initialHerbivores: 0, initialPredators: 0, plantGrowthPerDay: 0
+  });
+  const second = runExperiment(2, 20, {
+    initialPlants: 0, initialHerbivores: 1, initialPredators: 0,
+    plantGrowthPerDay: 0, herbivoreDailyCost: 100
+  });
+  const summary = summarizeExperiments([first, second]);
+  assert.equal(summary.runs, 2);
+  assert.equal(summary.herbivoreExtinctionRate, 100);
+  assert.equal(summary.predatorExtinctionRate, 100);
+  assert.equal(summary.averageFinal.herbivores, 0);
+});
+
+test("experiment validation rejects invalid run lengths", () => {
+  assert.throws(() => runExperiment(-1, 10), /semilla/);
+  assert.throws(() => runExperiment(1, 0), /días/);
+  assert.throws(() => summarizeExperiments([]), /al menos un resultado/);
 });
