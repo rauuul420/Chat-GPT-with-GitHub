@@ -86,6 +86,14 @@ function updateStats() {
   const environment = getEnvironment(world.day, world.config);
   element("environment").textContent = `${environment.seasonLabel} · ${environment.temperature} °C · Día ${environment.dayInSeason}/${environment.seasonLengthDays}`;
   element("speed").textContent = `${speed}× velocidad`;
+  const habitatNames = { aquatic: "Agua", wetland: "Humedal", forest: "Bosque", grassland: "Pradera", arid: "Árido", barren: "Desnudo" };
+  const habitatPanel = element("habitat-stats");
+  habitatPanel.replaceChildren();
+  for (const [biome, counts] of Object.entries(stats.habitats)) {
+    const line = document.createElement("div");
+    line.textContent = `${habitatNames[biome]}: ${counts.herbivores} herbívoros · ${counts.predators} depredadores · ${counts.plants} plantas`;
+    habitatPanel.append(line);
+  }
   renderEvents();
   renderInspector();
 }
