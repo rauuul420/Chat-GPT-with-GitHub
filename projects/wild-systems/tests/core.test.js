@@ -517,3 +517,28 @@ test("legacy hydrology saves receive biome classifications on migration", () => 
   const restored = restoreWorld(payload);
   assert.ok(restored.terrain.cells.every(cell => cell.biome === classifyBiome(cell)));
 });
+
+
+test("habitat population statistics exactly match organism and plant locations", () => {
+  const world = createWorld(31002);
+  const stats = getWorldStats(world);
+  const totals = Object.values(stats.habitats).reduce((sum, habitat) => ({
+    plants: sum.plants + habitat.plants,
+    herbivores: sum.herbivores + habitat.herbivores,
+    predators: sum.predators + habitat.predators
+  }), { plants: 0, herbivores: 0, predators: 0 });
+  assert.equal(totals.plants, world.plants.length);
+  assert.equal(totals.herbivores, world.herbivores.length);
+  assert.equal(totals.predators, world.predators.length);
+});
+
+test("habitat-aware animal decisions remain deterministic and survive save restoration", () => {
+  const first = createWorld(31003);
+  const second = createWorld(31003);
+  for (let day = 0; day < 220; day++) { stepWorld(first); stepWorld(second); }
+  assert.deepEqual(first, second);
+  const restored = restoreWorld(serializeWorld(first));
+  stepWorld(first);
+  stepWorld(restored);
+  assert.deepEqual(restored, first);
+});
