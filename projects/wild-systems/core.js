@@ -115,7 +115,7 @@ function chooseTerrainCell(world) {
 function createTraits(world, parent = null) {
   const traits = {};
   for (const key of ["speed", "metabolism", "efficiency"]) {
-    const inherited = parent?.traits?.[key] ?? 1;
+    const inherited = parent?.traits?.[key] ?? random(world, 0.9, 1.1);
     const mutation = parent && random(world) < 0.18
       ? random(world, -0.08, 0.08)
       : 0;
