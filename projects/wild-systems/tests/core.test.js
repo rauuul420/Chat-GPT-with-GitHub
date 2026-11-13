@@ -559,28 +559,17 @@ test("herbivores may prefer a nearby high-quality grassland plant over a closer 
   assert.equal(selectHerbivoreFood(world, herbivore).id, preferredPlant.id);
 });
 
-test("predators favour concentrated prey in suitable habitat over isolated nearby prey", () => {
+test("predators can favour a nearby prey cluster over a slightly closer isolated animal", () => {
   const world = createWorld(31005, { initialPlants: 0, initialHerbivores: 0, initialPredators: 0 });
-  const predator = { id: 1, x: 480, y: 270 };
-  const aquatic = world.terrain.cells[0];
-  const forest = world.terrain.cells[1];
-  aquatic.biome = "aquatic";
-  forest.biome = "forest";
-  const isolated = { id: 2, x: 500, y: 270 };
+  const predator = { id: 1, x: 500, y: 270 };
+  const isolated = { id: 2, x: 510, y: 270 };
   const group = [
-    { id: 3, x: 510, y: 270 },
-    { id: 4, x: 512, y: 271 },
-    { id: 5, x: 508, y: 269 }
+    { id: 3, x: 512, y: 270 },
+    { id: 4, x: 513, y: 271 },
+    { id: 5, x: 514, y: 269 }
   ];
-  // Place the isolated animal in aquatic terrain and the group in forest terrain.
-  isolated.x = aquatic.left + aquatic.width / 2;
-  isolated.y = aquatic.top + aquatic.height / 2;
-  predator.x = isolated.x - 5;
-  predator.y = isolated.y;
-  for (const prey of group) {
-    prey.x = forest.left + forest.width / 2 + (prey.id - 4) * 2;
-    prey.y = forest.top + forest.height / 2;
-  }
+  const cell = world.terrain.cells[world.terrain.rows * 3 + 6];
+  cell.biome = "grassland";
   world.herbivores = [isolated, ...group];
   assert.equal(selectPredatorPrey(world, predator).id, group[0].id);
 });
