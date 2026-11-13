@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wild Systems — Ecosystem Prototype</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#101510;color:#e7eee4}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0,#243326,#101510 65%)}
+main{max-width:1120px;margin:auto;padding:28px 22px 40px}
+header{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:18px}
+.eyebrow{color:#9bb69a;font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+h1{font-size:clamp(28px,5vw,44px);letter-spacing:-.04em;margin:5px 0}
+p{color:#aebbad;line-height:1.55;margin:6px 0}
+.tag{border:1px solid #435743;border-radius:999px;padding:7px 11px;color:#b9d3b3;font-size:12px;white-space:nowrap}
+.panel{background:#172019;border:1px solid #334437;border-radius:14px;padding:12px;box-shadow:0 18px 60px #0005}
+canvas{display:block;width:100%;aspect-ratio:16/9;background:#17261b;border-radius:8px}
+.toolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:12px}
+button{background:#26382a;color:#e7eee4;border:1px solid #526b52;border-radius:8px;padding:9px 13px;cursor:pointer;font:inherit;font-size:13px}
+button:hover{background:#354b38}button.primary{background:#a5c69a;color:#152016;border-color:#a5c69a;font-weight:700}
+.stats{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.stat{flex:1;min-width:110px;background:#1b281e;border:1px solid #334437;border-radius:10px;padding:10px 12px}
+.stat span{display:block;color:#91a18e;font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+.stat strong{display:block;font-size:22px;margin-top:3px;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:16px;flex-wrap:wrap;color:#aebbad;font-size:12px;margin:13px 2px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+footer{font-size:12px;color:#718071;margin-top:16px}
+@media(max-width:600px){header{align-items:start;flex-direction:column}}
+</style>
+</head>
+<body><main>
+<header><div><div class="eyebrow">An experiment in emergent behaviour</div><h1>Wild Systems</h1><p>A tiny world that runs by its own rules. No scripted story. Just life, pressure and consequences.</p></div><div class="tag">PROTOTYPE 0.1 · LOCAL SIMULATION</div></header>
+<section class="panel"><canvas id="world" width="960" height="540" aria-label="Simulación de un ecosistema"></canvas>
+<div class="toolbar"><button id="toggle" class="primary">Pausar</button><button id="step">Avanzar un día</button><button id="reset">Nuevo mundo</button><button id="slower">− Velocidad</button><button id="faster">+ Velocidad</button><span id="speed" style="color:#9fb09d;font-size:12px">1× velocidad</span></div>
+<div class="stats"><div class="stat"><span>Herbívoros</span><strong id="herb">—</strong></div><div class="stat"><span>Depredadores</span><strong id="pred">—</strong></div><div class="stat"><span>Vegetación</span><strong id="plants">—</strong></div><div class="stat"><span>Día</span><strong id="day">0</strong></div></div>
+<div class="legend"><span><i class="dot" style="background:#9acb79"></i>Vegetación</span><span><i class="dot" style="background:#e6c879"></i>Herbívoros</span><span><i class="dot" style="background:#d77e69"></i>Depredadores</span></div>
+</section>
+<footer>Experimento autónomo: los animales buscan alimento, consumen energía, se reproducen y mueren. La vegetación vuelve a crecer. Cambia la velocidad y observa qué ocurre.</footer>
+</main>
+<script>
+const canvas=document.querySelector('#world'),ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
+const $=id=>document.getElementById(id);let plants=[],herbs=[],preds=[],day=0,running=true,speed=1,frame=0;
+const rand=(a,b)=>a+Math.random()*(b-a),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function seed(){plants=[];herbs=[];preds=[];day=0;for(let i=0;i<210;i++)plants.push({x:rand(8,W-8),y:rand(8,H-8),energy:rand(.3,1)});for(let i=0;i<34;i++)herbs.push(animal('herb'));for(let i=0;i<7;i++)preds.push(animal('pred'));draw();updateStats()}
+function animal(type){return{x:rand(10,W-10),y:rand(10,H-10),a:rand(0,Math.PI*2),energy:type==='herb'?rand(55,90):rand(65,100),age:0,type}}
+function nearest(list,a){let best=null,bd=Infinity;for(const v of list){const d=dist(v,a);if(d<bd){bd=d;best=v}}return best}
+function move(a,target,pace){if(target){const wanted=Math.atan2(target.y-a.y,target.x-a.x);let delta=Math.atan2(Math.sin(wanted-a.a),Math.cos(wanted-a.a));a.a+=Math.max(-.13,Math.min(.13,delta))}else a.a+=rand(-.12,.12);a.x+=Math.cos(a.a)*pace;a.y+=Math.sin(a.a)*pace;if(a.x<5||a.x>W-5){a.a=Math.PI-a.a;a.x=Math.max(5,Math.min(W-5,a.x))}if(a.y<5||a.y>H-5){a.a=-a.a;a.y=Math.max(5,Math.min(H-5,a.y))}}
+function tick(){day++;for(let i=0;i<3;i++)if(plants.length<520)plants.push({x:rand(5,W-5),y:rand(5,H-5),energy:rand(.3,1)});
+for(const h of herbs){const food=nearest(plants,h);move(h,food,.85);h.energy-=.19;h.age++;if(food&&dist(h,food)<9){h.energy+=25;plants.splice(plants.indexOf(food),1)}if(h.energy>125&&herbs.length<150){h.energy*=.53;herbs.push({...animal('herb'),x:h.x+rand(-8,8),y:h.y+rand(-8,8)})}}
+for(const p of preds){const prey=nearest(herbs,p);move(p,prey,1.05);p.energy-=.28;p.age++;if(prey&&dist(p,prey)<11){p.energy+=48;herbs.splice(herbs.indexOf(prey),1)}if(p.energy>145&&preds.length<45){p.energy*=.55;preds.push({...animal('pred'),x:p.x+rand(-8,8),y:p.y+rand(-8,8)})}}
+herbs=herbs.filter(a=>a.energy>0&&a.age<1900);preds=preds.filter(a=>a.energy>0&&a.age<2200);updateStats()}
+function updateStats(){$('herb').textContent=herbs.length;$('pred').textContent=preds.length;$('plants').textContent=plants.length;$('day').textContent=day;$('speed').textContent=speed+'× velocidad'}
+function draw(){ctx.fillStyle='#17261b';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#263a2a';ctx.lineWidth=1;for(let x=0;x<W;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+for(const p of plants){ctx.globalAlpha=.45+p.energy*.5;ctx.fillStyle='#9acb79';ctx.beginPath();ctx.arc(p.x,p.y,1.4+p.energy*1.4,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;
+for(const a of herbs){ctx.fillStyle='#e6c879';ctx.beginPath();ctx.arc(a.x,a.y,3.2,0,Math.PI*2);ctx.fill()}
+for(const a of preds){ctx.fillStyle='#d77e69';ctx.beginPath();ctx.arc(a.x,a.y,5,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#f0b19e';ctx.lineWidth=1;ctx.stroke()} }
+function loop(){if(running){for(let i=0;i<speed;i++)tick()}draw();frame=requestAnimationFrame(loop)}
+$('toggle').onclick=()=>{running=!running;$('toggle').textContent=running?'Pausar':'Reanudar'};
+$('step').onclick=()=>{if(!running){tick();draw()}};
+$('reset').onclick=seed;$('slower').onclick=()=>{speed=Math.max(1,speed-1);updateStats()};$('faster').onclick=()=>{speed=Math.min(12,speed+1);updateStats()};
+seed();loop();
+</script></body></html>
