@@ -104,7 +104,11 @@ function updateStats() {
   for (const [species, label] of [["herbivores", "Herbívoros"], ["predators", "Depredadores"]]) {
     const traits = stats.genetics[species];
     const line = document.createElement("div");
-    line.textContent = `${label}: velocidad ${traits.speed.toFixed(2)}× · metabolismo ${traits.metabolism.toFixed(2)}× · eficiencia ${traits.efficiency.toFixed(2)}× · generación media ${traits.averageGeneration.toFixed(1)}`;
+    const range = key => {
+      const values = traits.distribution[key];
+      return `${traits[key].toFixed(2)}× [${values.min.toFixed(2)}–${values.max.toFixed(2)}]`;
+    };
+    line.textContent = `${label}: velocidad ${range("speed")} · metabolismo ${range("metabolism")} · eficiencia ${range("efficiency")} · generación media ${traits.averageGeneration.toFixed(1)}`;
     geneticsPanel.append(line);
   }
   renderEvents();
@@ -428,8 +432,13 @@ function renderExperimentResults(results) {
     const summary = summarizeExperiments(group);
     const line = document.createElement("p");
     const parameters = Object.entries(group[0].config).map(([key, value]) => `${key}: ${value}`).join(", ") || "valores base";
+    const change = species => {
+      const values = summary.averageGeneticChange[species];
+      const signed = value => `${value > 0 ? "+" : ""}${value.toFixed(3)}`;
+      return `velocidad ${signed(values.speed)}, metabolismo ${signed(values.metabolism)}, eficiencia ${signed(values.efficiency)}`;
+    };
     line.textContent =
-      `${group[0].scenarioLabel} (${parameters}) · ${summary.runs} ejecuciones · Media final: ${summary.averageFinal.herbivores.toFixed(1)} herbívoros, ${summary.averageFinal.predators.toFixed(1)} depredadores y ${summary.averageFinal.plants.toFixed(1)} plantas · Rasgos herbívoros: velocidad ${summary.averageGenetics.herbivores.speed.toFixed(2)}×, metabolismo ${summary.averageGenetics.herbivores.metabolism.toFixed(2)}×, eficiencia ${summary.averageGenetics.herbivores.efficiency.toFixed(2)}× · Extinción: herbívoros ${summary.herbivoreExtinctionRate}%, depredadores ${summary.predatorExtinctionRate}%.`;
+      `${group[0].scenarioLabel} (${parameters}) · ${summary.runs} ejecuciones · Media final: ${summary.averageFinal.herbivores.toFixed(1)} herbívoros, ${summary.averageFinal.predators.toFixed(1)} depredadores y ${summary.averageFinal.plants.toFixed(1)} plantas · Cambio genético medio: herbívoros (${change("herbivores")}), depredadores (${change("predators")}) · Extinción: herbívoros ${summary.herbivoreExtinctionRate}%, depredadores ${summary.predatorExtinctionRate}%.`;
     element("experiment-summary").append(line);
   }
 }
@@ -531,7 +540,7 @@ element("export-experiments").addEventListener("click", () => {
     return;
   }
 
-  const headers = ["scenario","seed","days","final_plants","final_herbivores","final_predators","herbivore_extinction_day","predator_extinction_day","mean_plants","mean_herbivores","mean_predators","peak_plants","peak_herbivores","peak_predators","herbivore_mean_speed","herbivore_mean_metabolism","herbivore_mean_efficiency","herbivore_mean_generation","predator_mean_speed","predator_mean_metabolism","predator_mean_efficiency","predator_mean_generation","event_totals_json","config_json"];
+  const headers = ["scenario","seed","days","final_plants","final_herbivores","final_predators","herbivore_extinction_day","predator_extinction_day","mean_plants","mean_herbivores","mean_predators","peak_plants","peak_herbivores","peak_predators","herbivore_mean_speed","herbivore_mean_metabolism","herbivore_mean_efficiency","herbivore_mean_generation","predator_mean_speed","predator_mean_metabolism","predator_mean_efficiency","predator_mean_generation","herbivore_delta_speed","herbivore_delta_metabolism","herbivore_delta_efficiency","predator_delta_speed","predator_delta_metabolism","predator_delta_efficiency","event_totals_json","config_json"];
   const rows = lastExperimentResults.map(result => [
     result.scenario, result.seed, result.days, result.final.plants, result.final.herbivores,
     result.final.predators, result.extinctionDays.herbivores ?? "",
@@ -542,6 +551,9 @@ element("export-experiments").addEventListener("click", () => {
     result.genetics.herbivores.efficiency, result.genetics.herbivores.averageGeneration,
     result.genetics.predators.speed, result.genetics.predators.metabolism,
     result.genetics.predators.efficiency, result.genetics.predators.averageGeneration,
+    result.geneticChange.herbivores.speed, result.geneticChange.herbivores.metabolism,
+    result.geneticChange.herbivores.efficiency, result.geneticChange.predators.speed,
+    result.geneticChange.predators.metabolism, result.geneticChange.predators.efficiency,
     JSON.stringify(result.eventTotals), JSON.stringify(result.config)
   ]);
   const csv = [headers, ...rows].map(row =>
