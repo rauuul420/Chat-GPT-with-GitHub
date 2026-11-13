@@ -52,7 +52,11 @@ function renderInspector() {
   const lineage = organism.parentId === null || organism.parentId === undefined
     ? "fundador"
     : "descendiente de #" + organism.parentId;
-  panel.textContent = `${species} #${organism.id} · Edad: ${organism.age} días · Energía: ${organism.energy.toFixed(1)} · Generación: ${generation} · ${lineage} · Velocidad: ${traits.speed.toFixed(2)}× · Metabolismo: ${traits.metabolism.toFixed(2)}× · Eficiencia: ${traits.efficiency.toFixed(2)}×`;
+  const maturityAge = organism.species === "herbivore"
+    ? world.config.herbivoreMaturityAge
+    : world.config.predatorMaturityAge;
+  const lifeStage = organism.age >= maturityAge ? "adulto" : "juvenil";
+  panel.textContent = `${species} #${organism.id} · ${lifeStage} · Edad: ${organism.age} días · Energía: ${organism.energy.toFixed(1)} · Generación: ${generation} · ${lineage} · Velocidad: ${traits.speed.toFixed(2)}× · Metabolismo: ${traits.metabolism.toFixed(2)}× · Eficiencia: ${traits.efficiency.toFixed(2)}×`;
 }
 
 function renderEvents() {
@@ -461,7 +465,9 @@ element("run-experiment").addEventListener("click", async () => {
     ["experiment-season-length", "seasonLengthDays", 30, 180, true],
     ["experiment-herbivore-cost", "herbivoreDailyCost", 0.01, 5, false],
     ["experiment-predator-cost", "predatorDailyCost", 0.01, 5, false],
-    ["experiment-predator-speed", "predatorSpeed", 0.1, 3, false]
+    ["experiment-predator-speed", "predatorSpeed", 0.1, 3, false],
+    ["experiment-herbivore-maturity", "herbivoreMaturityAge", 1, 365, true],
+    ["experiment-predator-maturity", "predatorMaturityAge", 1, 365, true]
   ];
   let invalidParameter = false;
   for (const [id, key, minimum, maximum, integer] of parameterDefinitions) {
@@ -499,7 +505,7 @@ element("run-experiment").addEventListener("click", async () => {
   button.disabled = true;
   element("experiment-scenario").disabled = true;
   element("clear-experiments").disabled = true;
-  for (const id of ["experiment-plant-growth","experiment-season-length","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed"]) element(id).disabled = true;
+  for (const id of ["experiment-plant-growth","experiment-season-length","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed","experiment-herbivore-maturity","experiment-predator-maturity"]) element(id).disabled = true;
   element("experiment-status").textContent = "Añadiendo resultados al laboratorio…";
 
   try {
@@ -523,7 +529,7 @@ element("run-experiment").addEventListener("click", async () => {
     button.disabled = false;
     element("clear-experiments").disabled = false;
     element("experiment-scenario").disabled = false;
-    for (const id of ["experiment-plant-growth","experiment-season-length","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed"]) element(id).disabled = false;
+    for (const id of ["experiment-plant-growth","experiment-season-length","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed","experiment-herbivore-maturity","experiment-predator-maturity"]) element(id).disabled = false;
   }
 });
 
