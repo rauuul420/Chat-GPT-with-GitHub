@@ -412,6 +412,7 @@ element("run-experiment").addEventListener("click", async () => {
   const customConfig = {};
   const parameterDefinitions = [
     ["experiment-plant-growth", "plantGrowthPerDay", 0, 20, true],
+    ["experiment-season-length", "seasonLengthDays", 30, 180, true],
     ["experiment-herbivore-cost", "herbivoreDailyCost", 0.01, 5, false],
     ["experiment-predator-cost", "predatorDailyCost", 0.01, 5, false],
     ["experiment-predator-speed", "predatorSpeed", 0.1, 3, false]
@@ -452,7 +453,7 @@ element("run-experiment").addEventListener("click", async () => {
   button.disabled = true;
   element("experiment-scenario").disabled = true;
   element("clear-experiments").disabled = true;
-  for (const id of ["experiment-plant-growth","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed"]) element(id).disabled = true;
+  for (const id of ["experiment-plant-growth","experiment-season-length","experiment-herbivore-cost","experiment-predator-cost","experiment-predator-speed"]) element(id).disabled = true;
   element("experiment-status").textContent = "Añadiendo resultados al laboratorio…";
 
   try {
