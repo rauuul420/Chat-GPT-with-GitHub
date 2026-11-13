@@ -1,5 +1,63 @@
 import { createWorld, stepWorld, getWorldStats } from "./core.js";
 
+export const EXPERIMENT_SCENARIOS = Object.freeze({
+  balanced: Object.freeze({
+    label: "Ecosistema equilibrado",
+    description: "Configuración base del simulador.",
+    config: Object.freeze({})
+  }),
+  herbivore_bloom: Object.freeze({
+    label: "Explosión de herbívoros",
+    description: "Más herbívoros al inicio y menos presión de depredación.",
+    config: Object.freeze({
+      initialPlants: 300,
+      initialHerbivores: 72,
+      initialPredators: 3,
+      maxHerbivores: 190
+    })
+  }),
+  predator_pressure: Object.freeze({
+    label: "Presión de depredadores",
+    description: "Mayor población inicial de depredadores y caza más intensa.",
+    config: Object.freeze({
+      initialPlants: 260,
+      initialHerbivores: 48,
+      initialPredators: 17,
+      predatorSpeed: 1.15,
+      predatorDailyCost: 0.24
+    })
+  }),
+  scarce_resources: Object.freeze({
+    label: "Escasez de recursos",
+    description: "Menos vegetación inicial y crecimiento lento.",
+    config: Object.freeze({
+      initialPlants: 65,
+      initialHerbivores: 42,
+      initialPredators: 8,
+      plantGrowthPerDay: 1
+    })
+  }),
+  predator_free: Object.freeze({
+    label: "Sin depredadores",
+    description: "Aísla la dinámica entre vegetación y herbívoros.",
+    config: Object.freeze({
+      initialPredators: 0,
+      maxPredators: 0
+    })
+  })
+});
+
+export function getExperimentScenario(id) {
+  const scenario = EXPERIMENT_SCENARIOS[id];
+  if (!scenario) throw new RangeError("El escenario seleccionado no existe.");
+  return {
+    id,
+    label: scenario.label,
+    description: scenario.description,
+    config: { ...scenario.config }
+  };
+}
+
 function validateInteger(value, name, minimum, maximum) {
   if (!Number.isInteger(value) || value < minimum || value > maximum) {
     throw new RangeError(`${name} debe estar entre ${minimum} y ${maximum}.`);
