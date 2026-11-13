@@ -29,7 +29,8 @@ GitHub Actions runs the test suite when files in this project change.
 
 ## Current prototype
 
-- **Vegetation** regrows within a population cap.
+- **Vegetation** regrows within a population cap, with seasonal growth rates.
+- **Seasons and climate** follow a deterministic four-season calendar; temperature varies over the year and through reproducible weather oscillations. Seasonal conditions affect plant growth and animal energy costs.
 - **Herbivores** seek vegetation, consume energy, reproduce, and die.
 - **Predators** hunt herbivores and reproduce when sufficiently fed.
 - Pause, resume, advance one day, reset, and adjust simulation speed.
@@ -62,6 +63,7 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 ## Model and current limitations
 
 - The world is a continuous 2D plane with reflecting borders.
+- The seasonal year has four configurable seasons of 90 days each by default. Spring, summer, autumn and winter modify vegetation growth and daily energy costs; temperature is a deterministic indicator, not yet a physiological survival threshold.
 - Organisms use nearest-target steering; there is no memory, territory, genetics, or social behaviour yet.
 - The model is an exploratory toy model, not a scientifically calibrated ecological model.
 - Predators act after the herbivore phase, so newly born herbivores can be hunted on the day they are born. Newborns do not otherwise take a turn in their birth phase.
@@ -89,6 +91,13 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Reproducible multi-seed experiment batches with population and extinction summaries.
 - [x] Export experiment results as CSV.
 - [ ] Copyable experiment settings.
+
+### 0.5 — A changing environment
+- [x] Add a deterministic four-season calendar.
+- [x] Add reproducible temperature variation.
+- [x] Make vegetation growth and animal energy costs season-dependent.
+- [x] Preserve seasonal growth state when saving and loading worlds.
+- [x] Display the current season and temperature.
 
 ### 0.4 — More interesting worlds
 - [ ] Seasons and environmental variation.
