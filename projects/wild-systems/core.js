@@ -11,6 +11,8 @@ const DEFAULT_CONFIG = Object.freeze({
   maxPredators: 45,
   plantGrowthPerDay: 3,
   seasonLengthDays: 90,
+  herbivoreMaturityAge: 30,
+  predatorMaturityAge: 45,
   terrainColumns: 12,
   terrainRows: 7,
   herbivoreSpeed: 0.85,
@@ -354,7 +356,8 @@ export function stepWorld(world) {
       if (foodIndex !== -1) world.plants.splice(foodIndex, 1);
     }
 
-    if (herbivore.energy > config.herbivoreBirthThreshold &&
+    if (herbivore.age >= config.herbivoreMaturityAge &&
+        herbivore.energy > config.herbivoreBirthThreshold &&
         world.herbivores.length + herbivoreBirths.length < config.maxHerbivores) {
       herbivore.energy *= 0.53;
       const newborn = createAnimal(
@@ -397,7 +400,8 @@ export function stepWorld(world) {
       if (preyIndex !== -1) world.herbivores.splice(preyIndex, 1);
     }
 
-    if (predator.energy > config.predatorBirthThreshold &&
+    if (predator.age >= config.predatorMaturityAge &&
+        predator.energy > config.predatorBirthThreshold &&
         world.predators.length + predatorBirths.length < config.maxPredators) {
       predator.energy *= 0.55;
       const newborn = createAnimal(
@@ -552,6 +556,8 @@ export function restoreWorld(serialized) {
   if (!Number.isFinite(world.config.width) || world.config.width <= 0 ||
       !Number.isFinite(world.config.height) || world.config.height <= 0 ||
       !Number.isInteger(world.config.seasonLengthDays) || world.config.seasonLengthDays < 1 || world.config.seasonLengthDays > 10000 ||
+      !Number.isInteger(world.config.herbivoreMaturityAge) || world.config.herbivoreMaturityAge < 1 || world.config.herbivoreMaturityAge > world.config.herbivoreMaxAge ||
+      !Number.isInteger(world.config.predatorMaturityAge) || world.config.predatorMaturityAge < 1 || world.config.predatorMaturityAge > world.config.predatorMaxAge ||
       world.day < 0 || world.nextId < 1 || world.nextEventId < 1) {
     throw new Error("El guardado contiene parámetros fuera de rango.");
   }
