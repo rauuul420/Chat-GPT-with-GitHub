@@ -594,6 +594,7 @@ test("offspring inherit parental traits and record their lineage", () => {
     plantGrowthPerDay: 0, herbivoreDailyCost: 0
   });
   const parent = world.herbivores[0];
+  parent.age = world.config.herbivoreMaturityAge - 1;
   parent.energy = 220;
   parent.traits = { speed: 1.1, metabolism: 0.9, efficiency: 1.2 };
   stepWorld(world);
@@ -705,6 +706,7 @@ test("repeated reproduction produces mutations while keeping traits bounded", ()
     herbivoreDailyCost: 0, herbivoreSpeed: 0
   });
   const parent = world.herbivores[0];
+  parent.age = world.config.herbivoreMaturityAge;
   parent.energy = 220;
   const original = { ...parent.traits };
   for (let day = 0; day < 40; day++) {
@@ -752,4 +754,44 @@ test("experiment batches measure average genetic change from the initial populat
   }
   const summary = summarizeExperiments([result, result]);
   assert.deepEqual(summary.averageGeneticChange, result.geneticChange);
+});
+
+
+test("juveniles cannot reproduce before reaching species maturity", () => {
+  const world = createWorld(77112, {
+    initialPlants: 0, initialHerbivores: 1, initialPredators: 0,
+    plantGrowthPerDay: 0, herbivoreDailyCost: 0
+  });
+  const parent = world.herbivores[0];
+  parent.energy = 220;
+  parent.age = world.config.herbivoreMaturityAge - 2;
+  stepWorld(world);
+  assert.equal(world.herbivores.length, 1);
+  assert.equal(parent.age, world.config.herbivoreMaturityAge - 1);
+  parent.energy = 220;
+  stepWorld(world);
+  assert.equal(world.herbivores.length, 2);
+  assert.equal(world.herbivores[1].parentId, parent.id);
+});
+
+test("predator reproduction respects its longer maturity period", () => {
+  const world = createWorld(77113, {
+    initialPlants: 0, initialHerbivores: 0, initialPredators: 1,
+    plantGrowthPerDay: 0, predatorDailyCost: 0
+  });
+  const parent = world.predators[0];
+  parent.energy = 220;
+  parent.age = world.config.predatorMaturityAge - 2;
+  stepWorld(world);
+  assert.equal(world.predators.length, 1);
+  parent.energy = 220;
+  stepWorld(world);
+  assert.equal(world.predators.length, 2);
+  assert.equal(world.predators[1].parentId, parent.id);
+});
+
+test("restore rejects maturity ages outside each species lifespan", () => {
+  const payload = JSON.parse(serializeWorld(createWorld(77114)));
+  payload.world.config.herbivoreMaturityAge = payload.world.config.herbivoreMaxAge + 1;
+  assert.throws(() => restoreWorld(payload), /parámetros fuera de rango/);
 });
