@@ -101,7 +101,6 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Display the current season and temperature.
 
 ### 0.4 — More interesting worlds
-- [ ] Seasons and environmental variation.
 - [ ] Terrain and resource distribution.
 - [ ] Traits, inheritance, mutation, and selection.
 - [x] Five scenario presets for controlled experiments.
