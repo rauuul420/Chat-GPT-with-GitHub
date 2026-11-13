@@ -283,10 +283,14 @@ test("legacy saves restore with a default seasonal growth accumulator", () => {
   const payload = JSON.parse(serializeWorld(world));
   delete payload.world.plantGrowthRemainder;
   delete payload.world.config.seasonLengthDays;
+  delete payload.world.config.herbivoreMaturityAge;
+  delete payload.world.config.predatorMaturityAge;
   delete payload.world.terrain;
   const restored = restoreWorld(payload);
   assert.equal(restored.plantGrowthRemainder, 0);
   assert.equal(restored.config.seasonLengthDays, 90);
+  assert.equal(restored.config.herbivoreMaturityAge, 30);
+  assert.equal(restored.config.predatorMaturityAge, 45);
   assert.deepEqual(restored.terrain, createTerrain(world.seed, restored.config));
   assert.equal(getEnvironment(91, restored.config).season, "summer");
 });
