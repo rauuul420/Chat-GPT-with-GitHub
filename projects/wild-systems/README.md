@@ -58,6 +58,7 @@ projects/wild-systems/
 ├── core.js             # Pure simulation rules and world state
 ├── package.json        # Native Node test command
 ├── README.md
+├── CHANGELOG.md
 └── tests/
     └── core.test.js    # Determinism and simulation invariants
 ```
