@@ -283,5 +283,6 @@ test("legacy saves restore with a default seasonal growth accumulator", () => {
   delete payload.world.config.seasonLengthDays;
   const restored = restoreWorld(payload);
   assert.equal(restored.plantGrowthRemainder, 0);
+  assert.equal(restored.config.seasonLengthDays, 90);
   assert.equal(getEnvironment(91, restored.config).season, "summer");
 });
