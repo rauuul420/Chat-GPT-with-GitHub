@@ -657,3 +657,72 @@ test("world statistics expose population-average inherited traits", () => {
   assert.equal(stats.genetics.herbivores.averageGeneration, 0);
   assert.ok(stats.genetics.predators.speed > 0);
 });
+
+
+test("metabolism traits change the daily energy cost", () => {
+  const lowCost = createWorld(77106, {
+    initialPlants: 0, initialHerbivores: 1, initialPredators: 0,
+    plantGrowthPerDay: 0, herbivoreDailyCost: 1
+  });
+  const highCost = createWorld(77106, {
+    initialPlants: 0, initialHerbivores: 1, initialPredators: 0,
+    plantGrowthPerDay: 0, herbivoreDailyCost: 1
+  });
+  lowCost.herbivores[0].traits.metabolism = 0.7;
+  highCost.herbivores[0].traits.metabolism = 1.3;
+  stepWorld(lowCost);
+  stepWorld(highCost);
+  assert.ok(lowCost.herbivores[0].energy > highCost.herbivores[0].energy);
+});
+
+test("feeding efficiency changes the energy gained from identical food", () => {
+  const low = createWorld(77107, {
+    initialPlants: 0, initialHerbivores: 1, initialPredators: 0,
+    plantGrowthPerDay: 0, herbivoreDailyCost: 0, herbivoreSpeed: 0
+  });
+  const high = createWorld(77107, {
+    initialPlants: 0, initialHerbivores: 1, initialPredators: 0,
+    plantGrowthPerDay: 0, herbivoreDailyCost: 0, herbivoreSpeed: 0
+  });
+  low.herbivores[0].traits.efficiency = 0.7;
+  high.herbivores[0].traits.efficiency = 1.3;
+  for (const world of [low, high]) {
+    const animal = world.herbivores[0];
+    world.plants.push({
+      id: world.nextId++, x: animal.x, y: animal.y, energy: 1,
+      terrainCellId: world.terrain.cells[0].id
+    });
+  }
+  stepWorld(low);
+  stepWorld(high);
+  assert.ok(high.herbivores[0].energy > low.herbivores[0].energy);
+});
+
+test("repeated reproduction produces mutations while keeping traits bounded", () => {
+  const world = createWorld(77108, {
+    initialPlants: 0, initialHerbivores: 1, initialPredators: 0,
+    maxHerbivores: 60, plantGrowthPerDay: 0,
+    herbivoreDailyCost: 0, herbivoreSpeed: 0
+  });
+  const parent = world.herbivores[0];
+  parent.energy = 220;
+  const original = { ...parent.traits };
+  for (let day = 0; day < 40; day++) {
+    parent.energy = 220;
+    stepWorld(world);
+  }
+  const offspring = world.herbivores.filter(animal => animal.parentId === parent.id);
+  assert.ok(offspring.length >= 30);
+  assert.ok(offspring.some(child =>
+    Object.keys(original).some(key => child.traits[key] !== original[key])
+  ));
+  assert.ok(offspring.every(child =>
+    Object.values(child.traits).every(value => value >= 0.65 && value <= 1.35)
+  ));
+});
+
+test("restore rejects out-of-range genetic traits", () => {
+  const payload = JSON.parse(serializeWorld(createWorld(77109)));
+  payload.world.herbivores[0].traits.speed = 1.5;
+  assert.throws(() => restoreWorld(payload), /genética inválida/);
+});
