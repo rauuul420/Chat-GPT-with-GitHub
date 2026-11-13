@@ -1,5 +1,5 @@
 import { createWorld, stepWorld, getWorldStats, serializeWorld, restoreWorld } from "./core.js";
-import { runExperiment, summarizeExperiments } from "./experiments.js";
+import { runExperiment, summarizeExperiments, getExperimentScenario } from "./experiments.js";
 
 const canvas = document.querySelector("#world");
 const context = canvas.getContext("2d");
@@ -317,7 +317,7 @@ function renderExperimentResults(results, summary) {
   }
 
   element("experiment-summary").textContent =
-    `Media final: ${summary.averageFinal.herbivores.toFixed(1)} herbívoros, ${summary.averageFinal.predators.toFixed(1)} depredadores y ${summary.averageFinal.plants.toFixed(1)} plantas. ` +
+    `${results[0].scenarioLabel} · Media final: ${summary.averageFinal.herbivores.toFixed(1)} herbívoros, ${summary.averageFinal.predators.toFixed(1)} depredadores y ${summary.averageFinal.plants.toFixed(1)} plantas. ` +
     `Extinción de herbívoros: ${summary.herbivoreExtinctionRate}% · depredadores: ${summary.predatorExtinctionRate}%.`;
 }
 
@@ -345,7 +345,11 @@ element("run-experiment").addEventListener("click", async () => {
   try {
     for (let index = 0; index < runs; index++) {
       const seed = (baseSeed + Math.imul(index, 0x9E3779B9)) >>> 0;
-      lastExperimentResults.push(runExperiment(seed, days));
+      const scenario = getExperimentScenario(element("experiment-scenario").value);
+      const result = runExperiment(seed, days, scenario.config);
+      result.scenario = scenario.id;
+      result.scenarioLabel = scenario.label;
+      lastExperimentResults.push(result);
       element("experiment-status").textContent = `Ejecutando experimento ${index + 1} de ${runs}…`;
       await new Promise(resolve => requestAnimationFrame(() => resolve()));
     }
@@ -366,9 +370,9 @@ element("export-experiments").addEventListener("click", () => {
     return;
   }
 
-  const headers = ["seed","days","final_plants","final_herbivores","final_predators","herbivore_extinction_day","predator_extinction_day","mean_plants","mean_herbivores","mean_predators","peak_plants","peak_herbivores","peak_predators"];
+  const headers = ["scenario","seed","days","final_plants","final_herbivores","final_predators","herbivore_extinction_day","predator_extinction_day","mean_plants","mean_herbivores","mean_predators","peak_plants","peak_herbivores","peak_predators"];
   const rows = lastExperimentResults.map(result => [
-    result.seed, result.days, result.final.plants, result.final.herbivores,
+    result.scenario, result.seed, result.days, result.final.plants, result.final.herbivores,
     result.final.predators, result.extinctionDays.herbivores ?? "",
     result.extinctionDays.predators ?? "", result.mean.plants,
     result.mean.herbivores, result.mean.predators, result.peak.plants,
