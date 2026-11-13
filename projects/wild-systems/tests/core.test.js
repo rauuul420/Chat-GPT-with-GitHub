@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createWorld, stepWorld, getWorldStats, getWorldSnapshot } from "../core.js";
+import { createWorld, stepWorld, getWorldStats, getWorldSnapshot, serializeWorld, restoreWorld } from "../core.js";
 
 test("the same seed creates an identical initial world", () => {
   const first = createWorld(123456);
@@ -123,4 +123,27 @@ test("event history stays bounded when a new event is recorded", () => {
   assert.equal(world.events.length, 200);
   assert.equal(world.events[0].id, 2);
   assert.equal(world.events.at(-1).type, "herbivore_feeding");
+});
+
+test("saving and restoring preserves the complete simulation state", () => {
+  const original = createWorld(424242);
+  for (let day = 0; day < 75; day++) stepWorld(original);
+
+  const serialized = serializeWorld(original);
+  const restored = restoreWorld(serialized);
+  assert.deepEqual(restored, original);
+
+  stepWorld(original);
+  stepWorld(restored);
+  assert.deepEqual(restored, original);
+});
+
+test("restore rejects unsupported or malformed save files", () => {
+  assert.throws(() => restoreWorld("{not json"), /JSON válido/);
+  assert.throws(() => restoreWorld(JSON.stringify({ format: "other", version: 1 })), /no son compatibles/);
+  assert.throws(() => restoreWorld(JSON.stringify({
+    format: "wild-systems-save",
+    version: 1,
+    world: { day: 0 }
+  })), /estructura incorrecta/);
 });
