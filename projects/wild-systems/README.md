@@ -41,6 +41,7 @@ GitHub Actions runs the test suite when files in this project change.
 - Pause, resume, advance one day, reset, and adjust simulation speed.
 - A deterministic seeded random generator makes runs reproducible; enter a seed in the interface to replay a world.
 - The simulation runs on a fixed time step, independent of display refresh rate.
+- Live statistics and experiment summaries distinguish juveniles from adults in both species.
 - A rolling population chart tracks vegetation, herbivores, and predators over the last 300 simulated days.
 - A concise event feed reports feeding, births, deaths, and predation.
 - A live habitat breakdown shows plants, herbivores and predators in each biome. Click an animal to inspect its species, ID, life stage, age, energy, generation, parent and inherited traits.
@@ -122,6 +123,7 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Add species-specific juvenile maturation before reproduction.
 - [x] Expose maturity ages as experiment parameters.
 - [x] Show juvenile/adult stage in the organism inspector.
+- [x] Expose juvenile/adult population counts in live statistics and experiment summaries.
 - [x] Validate maturity settings and preserve older saves with default values.
 
 ### 0.9 — Habitat-aware ecology
