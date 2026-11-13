@@ -7,6 +7,7 @@ Notable changes to Wild Systems are documented here.
 - Added species-specific juvenile maturation: herbivores mature at 30 days and predators at 45 days by default.
 - Added experiment overrides for both maturity ages.
 - Added juvenile/adult life-stage information to the organism inspector.
+- Added live juvenile/adult population counts, experiment summaries, and CSV fields.
 - Validated maturity settings and migrated older saves to the new defaults.
 - Updated the project version to 0.11.0.
 
