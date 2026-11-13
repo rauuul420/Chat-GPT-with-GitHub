@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createWorld, createTerrain, classifyBiome, selectHerbivoreFood, selectPredatorPrey, stepWorld, getWorldStats, getWorldSnapshot, serializeWorld, restoreWorld } from "../core.js";
-import { runExperiment, summarizeExperiments, getExperimentScenario, EXPERIMENT_SCENARIOS } from "../experiments.js";
+import { runExperiment, summarizeExperiments, getExperimentScenario, EXPERIMENT_SCENARIOS, serializeExperimentSettings, restoreExperimentSettings } from "../experiments.js";
 import { getEnvironment } from "../environment.js";
 
 test("the same seed creates an identical initial world", () => {
@@ -821,4 +821,30 @@ test("experiment summaries average final juvenile and adult populations", () => 
   const result = runExperiment(77116, 12);
   const summary = summarizeExperiments([result, result]);
   assert.deepEqual(summary.averageLifeStages, result.final.lifeStages);
+});
+
+
+test("experiment settings round-trip preserves scenario, overrides and run controls", () => {
+  const settings = {
+    scenario: "predator_pressure",
+    config: {
+      plantGrowthPerDay: 4,
+      predatorSpeed: 1.35,
+      herbivoreMaturityAge: 55
+    },
+    runs: 8,
+    days: 1200,
+    baseSeed: 20261113
+  };
+  assert.deepEqual(restoreExperimentSettings(serializeExperimentSettings(settings)), settings);
+});
+
+test("experiment settings reject malformed files, unknown scenarios and unsafe parameters", () => {
+  assert.throws(() => restoreExperimentSettings("{invalid"), /JSON válido/);
+  assert.throws(() => restoreExperimentSettings({ format: "other", version: 1 }), /no son compatibles/);
+  const base = { format: "wild-systems-experiment-settings", version: 1, scenario: "balanced", config: {}, runs: 5, days: 500, baseSeed: 42 };
+  assert.throws(() => restoreExperimentSettings({ ...base, scenario: "missing" }), /no existe/);
+  assert.throws(() => restoreExperimentSettings({ ...base, config: { predatorSpeed: 99 } }), /debe estar entre/);
+  assert.throws(() => restoreExperimentSettings({ ...base, config: { untrustedSetting: 1 } }), /no está permitido/);
+  assert.throws(() => restoreExperimentSettings({ ...base, runs: 0 }), /entre 1 y 20/);
 });
