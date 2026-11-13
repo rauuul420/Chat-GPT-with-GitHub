@@ -573,3 +573,86 @@ test("predators can favour a nearby prey cluster over a slightly closer isolated
   world.herbivores = [isolated, ...group];
   assert.equal(selectPredatorPrey(world, predator).id, group[0].id);
 });
+
+
+test("founder animals receive bounded baseline traits and generation zero", () => {
+  const world = createWorld(77101);
+  for (const animal of [...world.herbivores, ...world.predators]) {
+    assert.equal(animal.generation, 0);
+    assert.equal(animal.parentId, null);
+    for (const value of Object.values(animal.traits)) {
+      assert.ok(value >= 0.65 && value <= 1.35);
+    }
+    assert.deepEqual(Object.keys(animal.traits).sort(), ["efficiency", "metabolism", "speed"]);
+  }
+});
+
+test("offspring inherit parental traits and record their lineage", () => {
+  const world = createWorld(77102, {
+    initialPlants: 0, initialHerbivores: 1, initialPredators: 0,
+    plantGrowthPerDay: 0, herbivoreDailyCost: 0
+  });
+  const parent = world.herbivores[0];
+  parent.energy = 220;
+  parent.traits = { speed: 1.1, metabolism: 0.9, efficiency: 1.2 };
+  stepWorld(world);
+  const child = world.herbivores.find(animal => animal.parentId === parent.id);
+  assert.ok(child);
+  assert.equal(child.generation, 1);
+  for (const key of ["speed", "metabolism", "efficiency"]) {
+    assert.ok(child.traits[key] >= 0.65 && child.traits[key] <= 1.35);
+    assert.ok(Math.abs(child.traits[key] - parent.traits[key]) <= 0.08);
+  }
+});
+
+test("genetic traits influence movement, energy costs and feeding efficiency", () => {
+  const slow = createWorld(77103, {
+    initialPlants: 0, initialHerbivores: 1, initialPredators: 0,
+    plantGrowthPerDay: 0, herbivoreDailyCost: 0
+  });
+  const fast = createWorld(77103, {
+    initialPlants: 0, initialHerbivores: 1, initialPredators: 0,
+    plantGrowthPerDay: 0, herbivoreDailyCost: 0
+  });
+  slow.herbivores[0].traits.speed = 0.7;
+  fast.herbivores[0].traits.speed = 1.3;
+  const slowStart = { x: slow.herbivores[0].x, y: slow.herbivores[0].y };
+  const fastStart = { x: fast.herbivores[0].x, y: fast.herbivores[0].y };
+  stepWorld(slow);
+  stepWorld(fast);
+  const slowDistance = Math.hypot(slow.herbivores[0].x - slowStart.x, slow.herbivores[0].y - slowStart.y);
+  const fastDistance = Math.hypot(fast.herbivores[0].x - fastStart.x, fast.herbivores[0].y - fastStart.y);
+  assert.ok(fastDistance > slowDistance);
+});
+
+test("genetic traits and lineage survive saves; older saves migrate neutrally", () => {
+  const world = createWorld(77104);
+  const restored = restoreWorld(serializeWorld(world));
+  assert.deepEqual(restored, world);
+
+  const legacy = JSON.parse(serializeWorld(world));
+  for (const animal of [...legacy.world.herbivores, ...legacy.world.predators]) {
+    delete animal.traits;
+    delete animal.generation;
+    delete animal.parentId;
+  }
+  const migrated = restoreWorld(legacy);
+  for (const animal of [...migrated.herbivores, ...migrated.predators]) {
+    assert.deepEqual(animal.traits, { speed: 1, metabolism: 1, efficiency: 1 });
+    assert.equal(animal.generation, 0);
+    assert.equal(animal.parentId, null);
+  }
+});
+
+test("world statistics expose population-average inherited traits", () => {
+  const world = createWorld(77105, {
+    initialPlants: 0, initialHerbivores: 2, initialPredators: 1
+  });
+  world.herbivores[0].traits = { speed: 0.8, metabolism: 1, efficiency: 1.2 };
+  world.herbivores[1].traits = { speed: 1.2, metabolism: 1, efficiency: 0.8 };
+  const stats = getWorldStats(world);
+  assert.equal(stats.genetics.herbivores.speed, 1);
+  assert.equal(stats.genetics.herbivores.efficiency, 1);
+  assert.equal(stats.genetics.herbivores.averageGeneration, 0);
+  assert.ok(stats.genetics.predators.speed > 0);
+});
