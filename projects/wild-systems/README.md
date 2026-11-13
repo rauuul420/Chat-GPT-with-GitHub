@@ -29,17 +29,19 @@ GitHub Actions runs the test suite when files in this project change.
 
 ## Current prototype
 
+**Version 0.9.0 — habitat-aware ecology.** Animal target selection now accounts for biome affinity and local resource or prey concentration. Habitat population counts are visible in the simulation.
+
 - **Vegetation** regrows within a population cap, with seasonal growth rates and a bias towards fertile, moist terrain cells.
 - **Terrain and biomes** form a deterministic 12 × 7 grid. Fertility, elevation, soil moisture and surface water drive six changing habitat classes: aquatic, wetland, forest, grassland, arid and barren. Each biome modifies local vegetation suitability.
 - **Seasons and climate** follow a deterministic four-season calendar. Seasonal rainfall and evaporation feed a local water cycle: rain accumulates on the surface, infiltrates soil, evaporates or runs towards lower neighbouring cells. Soil moisture and surface water remain separate state variables.
-- **Herbivores** seek vegetation, consume energy, reproduce, and die.
-- **Predators** hunt herbivores and reproduce when sufficiently fed.
+- **Herbivores** choose vegetation using distance, local plant suitability and biome affinity, then consume energy, reproduce, and die.
+- **Predators** favour suitable habitats and local concentrations of herbivores when selecting prey, then reproduce when sufficiently fed.
 - Pause, resume, advance one day, reset, and adjust simulation speed.
 - A deterministic seeded random generator makes runs reproducible; enter a seed in the interface to replay a world.
 - The simulation runs on a fixed time step, independent of display refresh rate.
 - A rolling population chart tracks vegetation, herbivores, and predators over the last 300 simulated days.
 - A concise event feed reports feeding, births, deaths, and predation.
-- Click an animal to inspect its species, ID, age, energy, and position.
+- A live habitat breakdown shows plants, herbivores and predators in each biome. Click an animal to inspect its species, ID, age, energy, and position.
 - Export and import complete world saves as versioned JSON files.
 - Run batches of independent seeded worlds across five starting scenarios, compare final populations and extinction rates, and export CSV results.
 
@@ -67,10 +69,10 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - The world is a continuous 2D plane with reflecting borders, overlaid by a 12 × 7 ecological grid.
 - Biomes are emergent classifications, recalculated from local conditions each simulation day; they are not hand-painted map regions. Habitat suitability influences where new vegetation establishes.\n- The hydrology model is intentionally simplified: it represents surface runoff between neighbouring cells, infiltration and evaporation, but not groundwater, river networks, erosion or calibrated water volumes. Plant growth is still a population-level regrowth budget distributed by local habitat suitability.
 - A new world starts in spring. The seasonal year has four configurable seasons of 90 days each by default. Spring, summer, autumn and winter modify vegetation growth and daily energy costs; temperature is a deterministic indicator, not yet a physiological survival threshold.
-- Organisms use nearest-target steering; there is no memory, territory, genetics, or social behaviour yet.
+- Organisms use habitat-weighted target selection with simple fixed species affinities; there is no individual learning, memory, territory, genetics, or social behaviour yet.
 - The model is an exploratory toy model, not a scientifically calibrated ecological model.
 - Predators act after the herbivore phase, so newly born herbivores can be hunted on the day they are born. Newborns do not otherwise take a turn in their birth phase.
-- The nearest-target search is currently linear in the number of available targets; spatial indexing will matter for larger worlds.
+- Target selection and prey-density estimation are still direct scans; spatial indexing will matter for substantially larger worlds.
 - The population chart starts a fresh history window after loading a save; historical chart samples are not yet included in save files.
 - World editing is not implemented yet.
 
@@ -94,6 +96,12 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [x] Reproducible multi-seed experiment batches with population and extinction summaries.
 - [x] Export experiment results as CSV.
 - [ ] Copyable experiment settings.
+
+### 0.9 — Habitat-aware ecology
+- [x] Give herbivores biome affinities when selecting vegetation.
+- [x] Make predator target selection respond to biome suitability and nearby prey concentration.
+- [x] Expose live plant and animal distribution by biome.
+- [x] Test target selection, deterministic evolution, and habitat statistics.
 
 ### 0.8 — Emergent biomes
 - [x] Classify aquatic, wetland, forest, grassland, arid and barren habitats from local environmental conditions.
