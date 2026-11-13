@@ -1,7 +1,7 @@
 {
   "name": "wild-systems",
   "private": true,
-  "version": "0.5.0",
+  "version": "0.6.0",
   "type": "module",
   "scripts": {
     "check": "node --check core.js && node --check environment.js && node --check app.js && node --check experiments.js",
