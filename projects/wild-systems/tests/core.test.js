@@ -191,3 +191,24 @@ test("experiment validation rejects invalid run lengths", () => {
   assert.throws(() => runExperiment(1, 0), /días/);
   assert.throws(() => summarizeExperiments([]), /al menos un resultado/);
 });
+
+test("lifetime event counters are included in snapshots and saves", () => {
+  const world = createWorld(2026, {
+    initialPlants: 0,
+    initialHerbivores: 1,
+    initialPredators: 0,
+    plantGrowthPerDay: 0
+  });
+  const herbivore = world.herbivores[0];
+  world.plants.push({
+    id: world.nextId++,
+    x: herbivore.x,
+    y: herbivore.y,
+    energy: 1
+  });
+
+  stepWorld(world);
+  assert.equal(world.eventTotals.herbivore_feeding, 1);
+  const restored = restoreWorld(serializeWorld(world));
+  assert.deepEqual(restored.eventTotals, world.eventTotals);
+});
