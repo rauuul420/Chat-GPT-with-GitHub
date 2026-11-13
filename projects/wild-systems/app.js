@@ -247,6 +247,7 @@ element("world-file").addEventListener("change", async event => {
 
   try {
     world = restoreWorld(await file.text());
+    element("seed").value = String(world.seed);
     const stats = getWorldStats(world);
     history = [{
       day: stats.day,
