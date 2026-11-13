@@ -94,7 +94,8 @@ The browser laboratory can run 1–20 independent worlds for up to 3,000 days pe
 - [ ] Terrain and resource distribution.
 - [ ] Traits, inheritance, mutation, and selection.
 - [x] Five scenario presets for controlled experiments.
-- [x] Optional overrides for vegetation growth, energy costs, and predator speed.\n- [ ] Save and share custom scenario configurations.
+- [x] Optional overrides for vegetation growth, energy costs, and predator speed.
+- [ ] Save and share custom scenario configurations.
 
 ## Validation questions
 
