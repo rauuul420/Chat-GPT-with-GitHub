@@ -35,14 +35,14 @@ GitHub Actions runs the test suite when files in this project change.
 - Pause, resume, advance one day, reset, and adjust simulation speed.
 - A deterministic seeded random generator makes runs reproducible; enter a seed in the interface to replay a world.
 - The simulation runs on a fixed time step, independent of display refresh rate.
-- A rolling population chart tracks vegetation, herbivores, and predators over the last 300 simulated days.\n- A concise event feed reports feeding, births, deaths, and predation.\n- Export and import complete world saves as versioned JSON files.
+- A rolling population chart tracks vegetation, herbivores, and predators over the last 300 simulated days.\n- A concise event feed reports feeding, births, deaths, and predation.\n- Export and import complete world saves as versioned JSON files.\n- Run batches of independent seeded worlds, compare final populations and extinction rates, and export CSV results.
 
 ## Project structure
 
 ```text
 projects/wild-systems/
 ├── index.html          # Interface and canvas
-├── app.js              # Rendering, controls, animation loop
+├── app.js              # Rendering, controls, animation loop\n├── experiments.js      # Reproducible multi-run experiment runner
 ├── core.js             # Pure simulation rules and world state
 ├── package.json        # Native Node test command
 ├── README.md
@@ -50,7 +50,7 @@ projects/wild-systems/
     └── core.test.js    # Determinism and simulation invariants
 ```
 
-## Model and current limitations
+## Experiment laboratory\n\nThe browser laboratory can run 1–20 independent worlds for up to 3,000 days per world. Each run receives a deterministic seed derived from the base seed. Results include final, mean, and peak populations, first extinction day for herbivores and predators, and event totals. Export the run table as CSV for analysis. Batch execution yields between runs so the page can repaint and report progress.\n\n## Model and current limitations
 
 - The world is a continuous 2D plane with reflecting borders.
 - Organisms use nearest-target steering; there is no memory, territory, genetics, or social behaviour yet.
@@ -75,7 +75,7 @@ projects/wild-systems/
 - [x] Event log with explanations for major population changes.
 - [ ] Inspect individual organisms and their current energy/age.
 - [x] Seed entry for reproducible experiments.
-- [x] Export and import complete world state as JSON.\n- [ ] Copyable experiment settings.
+- [x] Export and import complete world state as JSON.\n- [x] Reproducible multi-seed experiment batches with population and extinction summaries.\n- [x] Export experiment results as CSV.\n- [ ] Copyable experiment settings.
 
 ### 0.4 — More interesting worlds
 - [ ] Seasons and environmental variation.
