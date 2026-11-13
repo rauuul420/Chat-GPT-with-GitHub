@@ -283,9 +283,11 @@ test("legacy saves restore with a default seasonal growth accumulator", () => {
   const payload = JSON.parse(serializeWorld(world));
   delete payload.world.plantGrowthRemainder;
   delete payload.world.config.seasonLengthDays;
+  delete payload.world.terrain;
   const restored = restoreWorld(payload);
   assert.equal(restored.plantGrowthRemainder, 0);
   assert.equal(restored.config.seasonLengthDays, 90);
+  assert.deepEqual(restored.terrain, createTerrain(world.seed, restored.config));
   assert.equal(getEnvironment(91, restored.config).season, "summer");
 });
 
@@ -330,4 +332,34 @@ test("seeded terrain does not break deterministic world evolution", () => {
     stepWorld(second);
   }
   assert.deepEqual(first, second);
+});
+
+
+test("predation increments both predation and herbivore death counters", () => {
+  const world = createWorld(1122, {
+    initialPlants: 0,
+    initialHerbivores: 1,
+    initialPredators: 1,
+    plantGrowthPerDay: 0,
+    herbivoreSpeed: 0,
+    predatorSpeed: 0
+  });
+  const prey = world.herbivores[0];
+  const predator = world.predators[0];
+  predator.x = prey.x;
+  predator.y = prey.y;
+  stepWorld(world);
+  assert.equal(world.herbivores.length, 0);
+  assert.equal(world.eventTotals.predation, 1);
+  assert.equal(world.eventTotals.herbivore_death, 1);
+  assert.equal(world.events.filter(event => event.type === "herbivore_death" && event.cause === "predation").length, 1);
+});
+
+test("restore rejects malformed terrain dimensions and cell values", () => {
+  const payload = JSON.parse(serializeWorld(createWorld(91)));
+  payload.world.terrain.columns = 1;
+  assert.throws(() => restoreWorld(payload), /terreno inválido/);
+  const invalidCell = JSON.parse(serializeWorld(createWorld(92)));
+  invalidCell.world.terrain.cells[0].moisture = 4;
+  assert.throws(() => restoreWorld(invalidCell), /terreno inválido/);
 });
