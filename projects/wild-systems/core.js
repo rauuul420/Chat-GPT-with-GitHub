@@ -82,6 +82,8 @@ export function createTerrain(seed, config = DEFAULT_CONFIG) {
         width: cellWidth, height: cellHeight,
         fertility: Number(fertility.toFixed(4)),
         moisture: Number(moisture.toFixed(4)),
+        surfaceWater: 0.02,
+        elevation: Number(hashTerrain(seed, x, y, 0xAD90777D).toFixed(4)),
         growthWeight: Number((fertility * moisture).toFixed(4))
       });
     }
@@ -179,13 +181,54 @@ export function createWorld(seed = 1, overrides = {}) {
   return world;
 }
 
-function updateTerrainMoisture(world, environment) {
-  for (const cell of world.terrain.cells) {
-    const localWeather = Math.sin(world.day * 0.17 + cell.id * 1.37) * 0.00025;
+function updateHydrology(world, environment) {
+  const { columns, rows, cells } = world.terrain;
+  const runoff = new Array(cells.length).fill(0);
+  const moistureDelta = new Array(cells.length).fill(0);
+
+  // Rain first reaches the surface. A portion infiltrates the soil; excess
+  // water runs towards the lowest neighbouring cell without order bias.
+  for (const cell of cells) {
+    const weatherVariation = 0.75 + hashTerrain(world.seed, cell.x, cell.y, world.day ^ 0x51ED270B) * 0.5;
+    cell.surfaceWater += environment.precipitation * weatherVariation;
+    const infiltration = Math.min(cell.surfaceWater, (1 - cell.moisture) * 0.075);
+    cell.surfaceWater -= infiltration;
+    moistureDelta[cell.id] += infiltration;
+
+    const evaporation = environment.evaporation * (0.65 + Math.max(0, environment.temperature) * 0.018);
+    moistureDelta[cell.id] -= evaporation;
+    cell.surfaceWater = Math.max(0, cell.surfaceWater - evaporation * 1.4);
+
+    if (cell.surfaceWater > 0.16) {
+      const neighbours = [];
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          if (dx === 0 && dy === 0) continue;
+          const x = cell.x + dx;
+          const y = cell.y + dy;
+          if (x < 0 || x >= columns || y < 0 || y >= rows) continue;
+          neighbours.push(cells[y * columns + x]);
+        }
+      }
+      const lower = neighbours
+        .filter(candidate => candidate.elevation < cell.elevation)
+        .sort((a, b) => a.elevation - b.elevation || a.id - b.id)[0];
+      if (lower) {
+        const flow = (cell.surfaceWater - 0.16) * 0.2;
+        runoff[cell.id] -= flow;
+        runoff[lower.id] += flow;
+      }
+    }
+  }
+
+  for (const cell of cells) {
+    cell.surfaceWater = Number(Math.max(0, Math.min(1, cell.surfaceWater + runoff[cell.id])).toFixed(4));
     cell.moisture = Number(Math.max(0.08, Math.min(0.98,
-      cell.moisture + environment.moistureChange + localWeather
+      cell.moisture + moistureDelta[cell.id]
     )).toFixed(4));
-    cell.growthWeight = Number((cell.fertility * cell.moisture).toFixed(4));
+    // Plants prefer moist soil, but permanently saturated ground is not ideal.
+    const moistureSuitability = Math.max(0.05, 1 - Math.abs(cell.moisture - 0.62) / 0.62);
+    cell.growthWeight = Number((cell.fertility * moistureSuitability).toFixed(4));
   }
 }
 
@@ -205,7 +248,7 @@ export function stepWorld(world) {
   world.day += 1;
 
   const environment = getEnvironment(world.day, config);
-  updateTerrainMoisture(world, environment);
+  updateHydrology(world, environment);
   const growthBudget = config.plantGrowthPerDay * environment.plantGrowthMultiplier
     + (world.plantGrowthRemainder ?? 0);
   const growthCount = Math.floor(growthBudget);
@@ -352,6 +395,15 @@ export function restoreWorld(serialized) {
 
   world.config = { ...DEFAULT_CONFIG, ...world.config };
   world.terrain ??= createTerrain(world.seed, world.config);
+  // Migrate 0.6 terrain cells to the hydrology-aware terrain schema.
+  if (world.terrain && Array.isArray(world.terrain.cells)) {
+    for (const cell of world.terrain.cells) {
+      if (cell && Number.isInteger(cell.x) && Number.isInteger(cell.y)) {
+        cell.surfaceWater ??= 0.02;
+        cell.elevation ??= Number(hashTerrain(world.seed, cell.x, cell.y, 0xAD90777D).toFixed(4));
+      }
+    }
+  }
   if (!world.terrain ||
       !Number.isInteger(world.terrain.columns) || world.terrain.columns < 2 || world.terrain.columns > 40 ||
       !Number.isInteger(world.terrain.rows) || world.terrain.rows < 2 || world.terrain.rows > 30 ||
@@ -361,6 +413,8 @@ export function restoreWorld(serialized) {
         !cell || cell.id !== index ||
         !Number.isFinite(cell.fertility) || cell.fertility < 0 || cell.fertility > 1 ||
         !Number.isFinite(cell.moisture) || cell.moisture < 0 || cell.moisture > 1 ||
+        !Number.isFinite(cell.surfaceWater) || cell.surfaceWater < 0 || cell.surfaceWater > 1 ||
+        !Number.isFinite(cell.elevation) || cell.elevation < 0 || cell.elevation > 1 ||
         !Number.isFinite(cell.growthWeight) || cell.growthWeight < 0 || cell.growthWeight > 1 ||
         !Number.isFinite(cell.left) || !Number.isFinite(cell.top) ||
         !Number.isFinite(cell.width) || cell.width <= 0 ||
