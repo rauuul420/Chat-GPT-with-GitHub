@@ -32,8 +32,9 @@ GitHub Actions runs the test suite when files in this project change.
 - **Herbivores** seek vegetation, consume energy, reproduce, and die.
 - **Predators** hunt herbivores and reproduce when sufficiently fed.
 - Pause, resume, advance one day, reset, and adjust simulation speed.
-- A deterministic seeded random generator makes runs reproducible.
+- A deterministic seeded random generator makes runs reproducible; enter a seed in the interface to replay a world.
 - The simulation runs on a fixed time step, independent of display refresh rate.
+- A rolling population chart tracks vegetation, herbivores, and predators over the last 300 simulated days.
 
 ## Project structure
 
@@ -69,10 +70,11 @@ projects/wild-systems/
 - [ ] Add state serialization and restore tests.
 
 ### 0.3 — Observe the ecosystem
-- [ ] Population history chart.
+- [x] Population history chart (rolling 300-day window).
 - [ ] Event log with explanations for major population changes.
 - [ ] Inspect individual organisms and their current energy/age.
-- [ ] Seed entry and copyable experiment settings.
+- [x] Seed entry for reproducible experiments.
+- [ ] Copyable experiment settings.
 
 ### 0.4 — More interesting worlds
 - [ ] Seasons and environmental variation.
