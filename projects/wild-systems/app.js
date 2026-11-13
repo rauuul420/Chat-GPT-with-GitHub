@@ -35,7 +35,6 @@ function updateStats() {
   element("plants").textContent = stats.plants;
   element("day").textContent = stats.day;
   element("speed").textContent = `${speed}× velocidad`;
-  element("seed").value = String(world.seed);
 }
 
 function drawWorld() {
@@ -152,6 +151,7 @@ function resetWorld(seedValue = null) {
     ? Math.floor(Math.random() * 0xFFFFFFFF) >>> 0
     : seedValue >>> 0;
   world = createWorld(seed);
+  element("seed").value = String(seed);
   history = [];
   accumulator = 0;
   recordHistory();
@@ -219,6 +219,7 @@ element("faster").addEventListener("click", () => {
   updateStats();
 });
 
+element("seed").value = String(world.seed);
 recordHistory();
 updateStats();
 drawWorld();
