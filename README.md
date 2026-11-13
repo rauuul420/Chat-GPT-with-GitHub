@@ -28,7 +28,7 @@ Use this space to:
 
 ### Wild Systems — ecosystem simulation
 
-An experimental 2D ecosystem where vegetation, herbivores, and predators interact through simple rules. The current prototype includes reproducible seeded worlds, a population history chart, and a recent-events feed.
+An experimental 2D ecosystem where vegetation, herbivores, and predators interact through simple rules. The current prototype includes reproducible seeded worlds, a population history chart, a recent-events feed, and versioned JSON save files.
 
 - **Status:** Prototype 0.3
 - **Technology:** Native JavaScript modules, HTML Canvas, Node.js built-in test runner
