@@ -1,8 +1,8 @@
 export const SEASONS = Object.freeze([
-  Object.freeze({ id: "spring", label: "Primavera", temperature: 15, plantGrowth: 1.25, herbivoreCost: 0.95, predatorCost: 0.95 }),
-  Object.freeze({ id: "summer", label: "Verano", temperature: 25, plantGrowth: 1, herbivoreCost: 1.05, predatorCost: 1.05 }),
-  Object.freeze({ id: "autumn", label: "Otoño", temperature: 12, plantGrowth: 0.65, herbivoreCost: 1, predatorCost: 1 }),
-  Object.freeze({ id: "winter", label: "Invierno", temperature: 2, plantGrowth: 0.25, herbivoreCost: 1.2, predatorCost: 1.15 })
+  Object.freeze({ id: "spring", label: "Primavera", temperature: 15, plantGrowth: 1.25, moistureChange: 0.0012, herbivoreCost: 0.95, predatorCost: 0.95 }),
+  Object.freeze({ id: "summer", label: "Verano", temperature: 25, plantGrowth: 1, moistureChange: -0.0012, herbivoreCost: 1.05, predatorCost: 1.05 }),
+  Object.freeze({ id: "autumn", label: "Otoño", temperature: 12, plantGrowth: 0.65, moistureChange: 0.0006, herbivoreCost: 1, predatorCost: 1 }),
+  Object.freeze({ id: "winter", label: "Invierno", temperature: 2, plantGrowth: 0.25, moistureChange: -0.0006, herbivoreCost: 1.2, predatorCost: 1.15 })
 ]);
 
 export const DEFAULT_SEASON_LENGTH_DAYS = 90;
@@ -35,6 +35,7 @@ export function getEnvironment(day, config = {}) {
     yearLengthDays: yearLength,
     temperature: Number((season.temperature + annualWave * 2 + weatherWave).toFixed(1)),
     plantGrowthMultiplier: season.plantGrowth,
+    moistureChange: season.moistureChange,
     herbivoreCostMultiplier: season.herbivoreCost,
     predatorCostMultiplier: season.predatorCost
   };
