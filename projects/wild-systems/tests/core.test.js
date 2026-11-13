@@ -223,3 +223,13 @@ test("experiment scenarios provide isolated configuration overrides", () => {
   assert.equal(Object.keys(EXPERIMENT_SCENARIOS).length, 5);
   assert.throws(() => getExperimentScenario("unknown"), /no existe/);
 });
+
+test("custom experiment parameters override only the selected scenario", () => {
+  const scenario = getExperimentScenario("predator_pressure");
+  const result = runExperiment(123, 25, {
+    ...scenario.config,
+    plantGrowthPerDay: 0
+  });
+  assert.equal(result.final.plants, Math.max(0, scenario.config.initialPlants));
+  assert.equal(result.final.predators >= 0, true);
+});
