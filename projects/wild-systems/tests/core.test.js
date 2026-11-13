@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createWorld, stepWorld, getWorldStats, getWorldSnapshot, serializeWorld, restoreWorld } from "../core.js";
 import { runExperiment, summarizeExperiments, getExperimentScenario, EXPERIMENT_SCENARIOS } from "../experiments.js";
+import { getEnvironment } from "../environment.js";
 
 test("the same seed creates an identical initial world", () => {
   const first = createWorld(123456);
@@ -236,4 +237,51 @@ test("custom experiment parameters override only the selected scenario", () => {
   assert.equal(result.final.plants, 20);
   assert.equal(result.final.herbivores, 0);
   assert.equal(result.final.predators, 0);
+});
+
+test("the seasonal calendar changes at exact configured boundaries", () => {
+  assert.equal(getEnvironment(1).season, "spring");
+  assert.equal(getEnvironment(90).season, "spring");
+  assert.equal(getEnvironment(91).season, "summer");
+  assert.equal(getEnvironment(180).season, "summer");
+  assert.equal(getEnvironment(181).season, "autumn");
+  assert.equal(getEnvironment(271).season, "winter");
+  assert.equal(getEnvironment(360).season, "winter");
+  assert.equal(getEnvironment(361).season, "spring");
+});
+
+test("seasonal weather is deterministic and supports custom season lengths", () => {
+  assert.deepEqual(getEnvironment(137), getEnvironment(137));
+  assert.equal(getEnvironment(1, { seasonLengthDays: 30 }).season, "spring");
+  assert.equal(getEnvironment(31, { seasonLengthDays: 30 }).season, "summer");
+  assert.throws(() => getEnvironment(-1), /entero no negativo/);
+  assert.throws(() => getEnvironment(1, { seasonLengthDays: 0 }), /duración/);
+});
+
+test("seasonal plant growth accumulates fractional growth without losing it", () => {
+  const world = createWorld(101, {
+    initialPlants: 0,
+    initialHerbivores: 0,
+    initialPredators: 0,
+    plantGrowthPerDay: 1,
+    maxPlants: 100
+  });
+  stepWorld(world);
+  assert.equal(world.plants.length, 1);
+  stepWorld(world);
+  assert.equal(world.plants.length, 2);
+  stepWorld(world);
+  assert.equal(world.plants.length, 3);
+  stepWorld(world);
+  assert.equal(world.plants.length, 5);
+});
+
+test("legacy saves restore with a default seasonal growth accumulator", () => {
+  const world = createWorld(2026);
+  const payload = JSON.parse(serializeWorld(world));
+  delete payload.world.plantGrowthRemainder;
+  delete payload.world.config.seasonLengthDays;
+  const restored = restoreWorld(payload);
+  assert.equal(restored.plantGrowthRemainder, 0);
+  assert.equal(getEnvironment(91, restored.config).season, "summer");
 });
