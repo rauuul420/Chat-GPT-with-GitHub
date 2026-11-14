@@ -2,6 +2,13 @@
 
 Notable changes to Wild Systems are documented here.
 
+## [0.14.0] — 2026-11-14
+
+- Added minimum, median and maximum final population outcomes across independent experiment seeds.
+- Displayed cross-seed outcome ranges beside average final populations in the experiment laboratory.
+- Added tests for even/odd batch medians, single-run batches and identical outcomes.
+
+
 ## [0.13.0] — 2026-11-13
 
 - Added population standard deviation and coefficient of variation across experiment runs.
