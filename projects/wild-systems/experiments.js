@@ -145,6 +145,18 @@ export function summarizeExperiments(results) {
   }
 
   const averageFinal = { plants: 0, herbivores: 0, predators: 0 };
+  const finalDistribution = Object.fromEntries(["plants", "herbivores", "predators"].map(species => {
+    const values = results.map(result => result.final[species]).sort((a, b) => a - b);
+    const middle = Math.floor(values.length / 2);
+    const median = values.length % 2 === 0
+      ? (values[middle - 1] + values[middle]) / 2
+      : values[middle];
+    return [species, {
+      min: values[0],
+      median: Number(median.toFixed(3)),
+      max: values[values.length - 1]
+    }];
+  }));
   const averageVariability = Object.fromEntries(["plants", "herbivores", "predators"].map(species => [
     species, { standardDeviation: 0, coefficientOfVariation: 0 }
   ]));
@@ -196,6 +208,7 @@ export function summarizeExperiments(results) {
   return {
     runs: results.length,
     averageFinal,
+    finalDistribution,
     averageVariability,
     averageLifeStages,
     averageGenetics,
