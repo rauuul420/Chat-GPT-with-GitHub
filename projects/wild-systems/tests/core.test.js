@@ -878,7 +878,8 @@ test("extinct populations have zero variability and zero coefficient of variatio
 
 test("experiment summaries expose final population ranges and exact medians across independent seeds", () => {
   const makeResult = (plants, herbivores, predators) => ({
-    final: { plants, herbivores, predators }
+    final: { plants, herbivores, predators },
+    extinctionDays: { herbivores: null, predators: null }
   });
   const summary = summarizeExperiments([
     makeResult(10, 2, 8),
