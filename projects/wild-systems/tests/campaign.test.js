@@ -45,7 +45,7 @@ test("CSV escaping quotes fields containing commas, quotes or newlines", () => {
     format: "wild-systems-campaign",
     summary: { herbivoreExtinctionRate: 0, predatorExtinctionRate: 0 },
     results: [{
-      seed: 1, days: 1,
+      seed: 'seed,"quoted', days: 1,
       final: { plants: 0, herbivores: 0, predators: 0 },
       mean: { plants: 0, herbivores: 0, predators: 0 },
       peak: { plants: 0, herbivores: 0, predators: 0 },
@@ -57,4 +57,5 @@ test("CSV escaping quotes fields containing commas, quotes or newlines", () => {
     }]
   });
   assert.ok(csv.startsWith("seed,days,"));
+  assert.ok(csv.split("\\n")[1].startsWith('"seed,""quoted",1,'));
 });
