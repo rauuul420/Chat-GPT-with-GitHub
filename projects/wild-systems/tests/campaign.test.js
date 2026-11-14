@@ -57,5 +57,5 @@ test("CSV escaping quotes fields containing commas, quotes or newlines", () => {
     }]
   });
   assert.ok(csv.startsWith("seed,days,"));
-  assert.ok(csv.split("\\n")[1].startsWith('"seed,""quoted",1,'));
+  assert.ok(csv.split("\n")[1].startsWith('"seed,""quoted",1,'));
 });
