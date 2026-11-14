@@ -874,3 +874,47 @@ test("extinct populations have zero variability and zero coefficient of variatio
   const summary = summarizeExperiments([result, result]);
   assert.equal(summary.averageVariability.herbivores.coefficientOfVariation, 0);
 });
+
+
+test("experiment summaries expose final population ranges and exact medians across independent seeds", () => {
+  const makeResult = (plants, herbivores, predators) => ({
+    final: { plants, herbivores, predators },
+    extinctionDays: { herbivores: null, predators: null }
+  });
+  const summary = summarizeExperiments([
+    makeResult(10, 2, 8),
+    makeResult(20, 4, 6),
+    makeResult(30, 6, 4),
+    makeResult(40, 8, 2)
+  ]);
+  assert.deepEqual(summary.finalDistribution, {
+    plants: { min: 10, median: 25, max: 40 },
+    herbivores: { min: 2, median: 5, max: 8 },
+    predators: { min: 2, median: 5, max: 8 }
+  });
+});
+
+test("final population distributions handle one run and identical outcomes", () => {
+  const result = runExperiment(77120, 10, {
+    initialPlants: 0, initialHerbivores: 0, initialPredators: 0,
+    plantGrowthPerDay: 0
+  });
+  const single = summarizeExperiments([result]);
+  assert.deepEqual(single.finalDistribution.plants, { min: 0, median: 0, max: 0 });
+  const repeated = summarizeExperiments([result, result, result]);
+  assert.deepEqual(repeated.finalDistribution.herbivores, { min: 0, median: 0, max: 0 });
+});
+
+
+test("final population distributions use the middle outcome for odd-sized batches", () => {
+  const makeResult = value => ({
+    final: { plants: value, herbivores: value * 2, predators: value * 3 },
+    extinctionDays: { herbivores: null, predators: null }
+  });
+  const summary = summarizeExperiments([makeResult(9), makeResult(2), makeResult(5)]);
+  assert.deepEqual(summary.finalDistribution, {
+    plants: { min: 2, median: 5, max: 9 },
+    herbivores: { min: 4, median: 10, max: 18 },
+    predators: { min: 6, median: 15, max: 27 }
+  });
+});
