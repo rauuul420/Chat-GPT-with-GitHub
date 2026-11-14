@@ -2,6 +2,12 @@
 
 Notable changes to Wild Systems are documented here.
 
+## Unreleased
+
+- Added a Node.js offline campaign runner for up to 1,000 independently seeded worlds.
+- Added JSON and CSV campaign reports with per-world population, extinction and genetic metrics.
+- Added campaign validation and deterministic seed-sequence tests.
+
 ## [0.13.0] — 2026-11-13
 
 - Added population standard deviation and coefficient of variation across experiment runs.

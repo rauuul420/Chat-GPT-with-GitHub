@@ -18,6 +18,8 @@ Then open [http://localhost:8000](http://localhost:8000).
 
 No build step or third-party dependency installation is required.
 
+For larger offline campaigns, use the Node.js command-line runner described below.
+
 For syntax checks and automated tests, use Node.js 20 or newer:
 
 ```bash
@@ -55,18 +57,31 @@ projects/wild-systems/
 ├── index.html          # Interface and canvas
 ├── app.js              # Rendering, controls, animation loop
 ├── experiments.js      # Scenarios and reproducible multi-run experiment runner
+├── campaign.js         # Offline campaign runner and CSV report export
+├── run-campaign.js     # Node.js command-line interface
 ├── environment.js      # Deterministic seasons and climate
 ├── core.js             # Pure simulation rules and world state
 ├── package.json        # Native Node test command
 ├── README.md
 ├── CHANGELOG.md
 └── tests/
-    └── core.test.js    # Determinism and simulation invariants
+    ├── core.test.js    # Determinism and simulation invariants
+    └── campaign.test.js # Offline campaign and CSV tests
 ```
 
 ## Experiment laboratory
 
 The browser laboratory can run 1–20 independent worlds for up to 3,000 days per world. Choose one of five scenarios, optionally override vegetation growth, season length, daily energy costs, predator speed, and species maturity ages, then run independent seeds derived deterministically from the base seed. Results include final, mean, and peak populations, population standard deviation and coefficient of variation, first extinction day for herbivores and predators, event totals, final genetic averages, and initial-to-final trait changes. Results from different scenario runs accumulate in a comparison table with per-scenario summaries until cleared. Reusing the same base seed across scenarios helps compare different ecological conditions with a consistent seed set. The laboratory keeps up to 500 result rows in memory. Export the full table as CSV for analysis. Export and import validated JSON experiment settings to share reproducible configurations without replacing accumulated results. Batch execution yields between runs so the page can repaint and report progress.
+
+## Offline experiment campaigns
+
+The browser laboratory is intentionally limited to 1–20 worlds so it remains responsive. Node.js can run larger, independent campaigns without opening the browser. From this directory:
+
+```bash
+npm run campaign -- --scenario predator_pressure --runs 250 --days 1500 --seed 42000 --format csv --output campaign.csv
+```
+
+The command-line runner supports 1–1,000 worlds and 1–3,000 days per world. It uses consecutive uint32 seeds beginning at the supplied base seed, runs the same simulation engine and scenario presets as the browser, and does not change the open browser world. JSON output includes the complete per-world results and aggregate summary; CSV output contains one row per world with final, mean and peak populations, first extinction days, batch extinction rates and genetic trait shifts. Omit `--output` to write the selected format to standard output. Use `--help` for all options. Large campaigns can take substantial time and memory because the JSON report retains every per-world result.
 
 ## Genetic model
 

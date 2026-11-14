@@ -4,7 +4,8 @@
   "version": "0.13.0",
   "type": "module",
   "scripts": {
-    "check": "node --check core.js && node --check environment.js && node --check app.js && node --check experiments.js",
-    "test": "node --test"
+    "check": "node --check core.js && node --check environment.js && node --check app.js && node --check experiments.js && node --check campaign.js && node --check run-campaign.js",
+    "test": "node --test",
+    "campaign": "node ./run-campaign.js"
   }
 }
